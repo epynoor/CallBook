@@ -1,0 +1,110 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+
+    @*<script type="text/javascript" src="~/app-assets/vendors/js/vendors.min.js" ></script>
+    <script type="text/javascript" src="~/app-assets/vendors/js/ui/jquery.sticky.js"></script>*@
+
+    <script type="text/javascript" src="~/lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="~/lib/jquery-validation/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script type="text/javascript" src="~/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/lib/select2/js/select2.js" ></script>
+    <script type="text/javascript" src="~/lib/toastr/toastr.min.js" ></script>
+    <script type="text/javascript" src="~/js/msc-confirm.js"></script>
+    <script type="text/javascript" src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="~/lib/datatables-button/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="~/lib/jquery-confirm/jquery-confirm.min.js"></script>
+    <script type="text/javascript" src="~/lib/momentjs/moment.min.js"></script>
+    <script type="text/javascript" src="~/js/dataTables.dateTime.min.js"></script>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>  
+
+    <script>
+    $(document).ready(function () {
+
+    @if (TempData.ContainsKey("ErrorMessage"))
+    {
+        @:toastr.error('@TempData["ErrorMessage"]');
+    };
+    });
+    </script>
+
+    
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <script>
+            $(document).ready(function () {
+                $("body").addClass(" bg-full-screen-image");
+            })
+        </script>
+    }
+    else
+    {
+        <script>
+            $(document).ready(function () {
+                $("body").removeClass(" bg-full-screen-image");
+            })
+        </script>
+    }
+
+    <script>
+        $.extend(true, $.fn.dataTable.defaults, {
+            searching: true,
+            ordering: false,
+            lengthChange: false,
+            paging: true,
+            //pageLength:10,
+            //fixedHeader: true,
+
+            language: {
+                loadingRecords: '&nbsp;',
+                processing: '<img src="image/spinner.gif" id="spin-img"/>',
+                infoFiltered: ""
+            },
+        });
+    </script>
+
+    <script>
+
+        $('#userInfo').on ('mouseenter', function(e){
+            $(this).parent().parent().addClass('show');
+        });
+
+        $('#userInfoli').on ('mouseleave', function(e){
+            $(this).removeClass('show');
+        });
+       
+    </script>
+
+    <script>
+
+        $.fn.dataTable.render.moment = function ( from, to, locale ) {
+            alert(from);
+            alert(to);
+            // Argument shifting
+            if ( arguments.length === 1 ) {
+                locale = 'en';
+                to = from;
+                from = 'YYYY-MM-DD';
+            }
+            else if ( arguments.length === 2 ) {
+                locale = 'en';
+            }
+ 
+            return function ( d, type, row ) {
+                if (! d) {
+                    return type === 'sort' || type === 'type' ? 0 : d;
+                }
+ 
+                var m = window.moment( d, from, locale, true );
+ 
+                // Order and type get a number value from Moment, everything else
+                // sees the rendered value
+                return m.format( type === 'sort' || type === 'type' ? 'x' : to );
+            };
+        };
+
+    </script>

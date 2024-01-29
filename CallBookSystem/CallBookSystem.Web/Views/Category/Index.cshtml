@@ -1,0 +1,306 @@
+﻿
+@{
+    ViewData["Title"] = "Category";
+    Layout = "~/Views/Shared/Template/_Layout.cshtml";
+}
+
+<br />
+<div class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                 <h3 class="card-title">Category <small>List</small></h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>            
+            <div class="card-body">  
+                <div class="card-content">
+                    <div id="product-summary" class="media-list position-relative">
+                        <div class="table-responsive">
+                            <table class="table table-padded table-xl mb-0 w-100" id="category-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Process Name</th>
+                                        <th>Category ID</th>
+                                        <th>Category Name</th>
+                                        <th>Entry By</th>                                                        
+                                        <th>Entry Date</th>
+                                        <th>Updated By</th>
+                                        <th>Updated Date</th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>              
+            </div>
+        </div>    
+    </div>
+</div>
+
+<partial name="_CategoryEntry" />
+
+@section Scripts
+{
+    <script>
+
+    var table;
+
+    table = $('#category-list-table').DataTable({
+        "filter": true, // this is for disable filter (search box)
+        "paging": true,
+        "pageLength": 10,
+        "lengthChange": false,
+        "pagingType": "full_numbers",
+        "scrollX": false,
+        "autoWidth": true,
+        "initComplete": function (settings, json) {
+            $("#category-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+
+            var btns = $('.btn-primary');
+                btns.addClass('btn-sm');
+                btns.removeClass('btn-secondary');
+        },
+        buttons: [
+            {
+                id:"btnAddNew",
+                text: 'Add New',
+                className: 'btn-primary',
+                action: function ( e, dt, node, config ) {
+                    $("#category-list-table").modal('show');
+                }
+            }
+        ],
+    });
+
+    loadCategoryList('-1');
+
+
+    function loadCategoryList(processId) {
+
+        $('#category-list-table').DataTable().destroy();
+
+        table =  $('#category-list-table').DataTable({
+            //"processing": true, // for show progress bar
+            "language": {
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+            },
+            "filter": true, // this is for disable filter (search box)
+            "paging": true,
+            "pageLength": 10,
+            "lengthChange": false,
+            "pagingType": "full_numbers",
+            "scrollX": false,
+            "autoWidth": true,
+            "bInfo" : false,
+            "ajax": {
+                "url": "/Category/GetCategoriesList",
+                "data": {processId: processId},
+                "dataSrc": function(d) {
+                    if (d.data.length === 0) {
+                        var settings = $('#category-list-table').DataTable().settings()[0];
+                        settings.oLanguage.sEmptyTable = d.message;
+                    }
+                    return d.data;
+                },
+                "type": "POST",
+                "dataType": "json"
+            },
+            "columns": [
+                { "data": "processName", "name": "ProcessName" },
+                { "data": "id", "name": "Id" },
+                { "data": "categoryName", "name": "CategoryName" },
+                { "data": "entryBy", "name": "EntryBy" },
+                { "data": "entryDate", "name": "EntryDate"},
+                { "data": "updatedBy", "name": "UpdatedBy" },
+                { "data": "updatedDate", "name": "UpdatedDate"},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var dom = '<span class="cursor-pointer row-edit" ><i class="fas fa-edit primary fa-2x"></i><span>';
+                        return dom;
+                    }
+                },
+            ],
+             columnDefs: [{
+                 render: function(data) {
+                        var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                         var date = new Date(data);
+                         var month = months[date.getMonth()];
+                         return date.getDate()+"-"+month + "-" + date.getFullYear()
+                           + ' ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                     },
+                    targets: [4,6]
+                }
+             ],
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    id:"btnAddNew",
+                    text: 'Add New',
+                    className: 'btn-primary',
+                    action: function ( e, dt, node, config ) {                    
+                        clearModal();
+                        $("#category-entry-modal").modal('show');
+                    }
+                }
+            ],
+            "initComplete": function(settings, json) {
+                $("#category-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+
+                var btns = $('.btn-primary');
+                btns.addClass('btn-sm');
+                btns.removeClass('btn-secondary');
+            }
+        });
+    }
+
+    function clearModal() {        
+        $('#categoryName').val('');
+        $('#hdnCategoryId').val('');
+        $('#option').text('Entry');
+        $('#processId').val(null).trigger("change");
+    }
+
+    var pageSize = 5;
+    
+    $("#processId").select2({
+        multiple: false,
+        delay: 250,
+        cache: true,
+        templateSelection: function (state) {
+            if (state.id) {
+                return state.name ? state.name : state.text;
+            }
+        },
+        ajax: {
+            url: "/Process/ProcessFilter",
+            data: function (params) {
+                var query = {
+                    id: (!params.term) ?  "" : params.term,
+                    processName: (!params.term) ?  "" : params.term,
+                    pageNumber: params.page || 1,
+                    pageSize: pageSize
+                };
+                return query;
+            },
+            dataType: 'json',
+            processResults: function (response, params) {
+                
+                selectData = {};
+                params.page = params.page || 1;
+                selectData = response.data.map(function (item) {
+                    return {
+                        id: item.id,
+                        text: item.processName                       
+                    };
+                });
+                //hideLoader();
+                return {
+                    results: selectData,
+                    pagination: {
+                        more: (params.page * pageSize) < response.total
+                    }
+                };
+            }
+        },
+        placeholder: "Select a State",
+        allowClear: true,
+        dropdownParent: $("#category-entry-modal")
+
+    });
+
+    $(document).on('select2:open', () => {
+        document.querySelector('.select2-search__field').focus();
+    });
+
+    
+
+    $('#category-entry-modal').on('click', '#btn-category-save', function () {
+
+         var categoryName = $('#categoryName').val();
+
+         var categoryId = $('#hdnCategoryId').val();
+
+         var processId = $('#processId').val();
+
+        if( !(processId) || (processId == null)) {
+             toastr.error('Select a process!!!');
+             $.alert('Select a process!!!');
+             return;
+        }
+
+         if (!(categoryName) || categoryName == null) {
+             toastr.error('Sorry!!! Category name is required!!!');
+             $.alert('Sorry!!! Category name is required!!!');
+             return;
+         }
+
+
+         $.confirm({
+            title: 'Confirm!',
+            content: 'Are you sure to save?',
+            buttons: {
+                confirm: function () {
+                    var category = {};
+                    category['CategoryName'] = categoryName;
+                    category['Id'] = categoryId;
+                    category['ProcessId'] = processId;
+
+
+                    $.ajax({
+                        url: "/Category/SaveCategory",
+                        type: "POST",
+                        data: { category: category },
+                        success: function (data) {
+
+                            if (data.status == true) {
+                                toastr.success("message", data.message);
+                               $("#category-entry-modal").modal('hide');
+                                clearModal();
+                                loadCategoryList('-1');
+                            }
+                            else {
+                                toastr.error("Error", data.message);
+                                $.alert(data.message);
+                            }
+                        }
+                        
+                    });
+
+                },
+                cancel: function () {
+                    
+                }
+            }
+        });
+            
+        });
+
+    $('#category-list-table').on('click', '.row-edit', function() {
+        var rowData = table.row($(this).parents('tr')).data();
+        $('#categoryName').val(rowData['categoryName']);
+        $('#hdnCategoryId').val(rowData['id']);
+
+         $('#processId').html('');
+         var optionState ='';
+         optionState ='<option value="' + rowData['processId'] +'">' + rowData['processName'] +'</option>';        
+         $('#processId').append(optionState);
+        $("#category-entry-modal").modal('show');
+    } )
+
+    function CloseModalPopup() {       
+            $("#category-entry-modal").modal('hide');
+            $("#btn_close").modal('hide');
+            clearModal();
+    }
+       
+    </script>
+}

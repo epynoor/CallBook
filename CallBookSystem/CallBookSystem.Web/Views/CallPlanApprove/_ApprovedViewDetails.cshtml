@@ -1,0 +1,105 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+
+
+<div class="modal fade text-left" id="callPlan-update-modal1" role="dialog" aria-labelledby="reassign-modal-label" aria-hidden="true" style="z-index:1051;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-white" id="reassign-modal-label">View <span id="option">Details</span></h5>
+                <button type="button" class="close text-white" onclick="CloseModalPopup();" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body modal-fixed">
+                 <div class="form-group row">
+                    <label  class ="col-sm-2 col-form-label-sm text-right">Batch <span class="text-danger ml-005">No :</span></label>
+                     <div class="col-sm-4 ">
+                          <label id="lblBatchno1"   class ="col-sm-2 col-form-label-sm text-right"> </label>
+        
+                    </div> 
+                 </div>
+               @* <div class="form-group row">
+                    <label class ="col-sm-2 col-form-label-sm text-right">Category <span class="text-danger ml-005">*</span></label>
+                    <div class="col-sm-4 ">
+                        <select id="UCategoryId" class=" form-control form-control-sm select2" placeholder="Select a Category" style="width: 100%;">
+                        </select> 
+                        <input type="hidden" id="UtempId" />
+                    </div>
+                    <label class ="col-sm-2 col-form-label-sm text-right">Call Type <span class="text-danger ml-005">*</span></label>
+                    <div class="col-sm-4 ">
+                        <select id="UCallTypeId" class="form-control form-control-sm select2" placeholder="Select a Call Type" style="width: 100%;">
+                    </select>
+                    </div>
+                    
+                </div>
+                <div class="form-group row">
+                    <label class ="col-sm-2 col-form-label-sm text-right">CIF</label>
+                    <div class="col-sm-4 ">
+                        <input type="text" id="UCIF" class="form-control form-control-sm" placeholder="Enter CIF" autocomplete="off" style="width: 100%;">
+                    </div>                    
+                    <label class ="col-sm-2 col-form-label-sm text-right">Name <span class="text-danger ml-005">*</span></label>
+                    <div class=" col-sm-4 ">
+                        <input type="text" id="UName" class=" form-control form-control-sm" placeholder="Enter Name" autocomplete="off" style="width: 100%;"> 
+                    </div>                         
+                </div>
+                <div class="form-group row">
+                    <label class ="col-sm-2 col-form-label-sm text-right">Subject <span class="text-danger ml-005">*</span></label>
+                    <div class="col-sm-10">
+                        <input type="text" id="USubject" class="form-control form-control-sm" placeholder="Enter Subject" autocomplete="off" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class ="col-sm-2 col-form-label-sm text-right">Description</label>
+                    <div class="col-sm-10">
+                        <input type="text" id="UPurpose" class="form-control form-control-sm" placeholder="Enter Description" autocomplete="off" style="width: 100%;">
+                    </div>
+                    
+                </div>
+                <div class="form-group row">
+                    <label class ="col-sm-2 col-form-label-sm text-right">Tentative Date <span class="text-danger ml-005">*</span></label>
+                    <div class="col-sm-4">
+                        <input type="text" id="UTentativeDate" class=" form-control form-control-sm" placeholder="(dd-MMM-yyyy)" autocomplete="off" style="width: 100%;" readonly>
+                    </div>                    
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-primary mb-3" id="btn-TempUpdate-Add">Update</button>
+                       
+                    </div>      
+                </div>*@
+
+                <div id="tempCallPlan-summary" class="media-list position-relative">
+                    <div class="table-responsive">
+                        <table class="table table-padded table-xl mb-0 w-100" id="update-callplan-list-table1">
+                            <thead>
+                                <tr>
+                                    <th style="padding-left:10px">Category</th>
+                                    <th style="padding-left:10px">Call Type</th>
+                                    <th style="padding-left:10px">CIF</th>                                                       
+                                    <th style="padding-left:10px">Name</th>      
+                                    <th style="padding-left:10px">Subject</th>
+                                    <th style="padding-left:10px">Tentative Date</th>
+                                    <th style="background-image:none;padding-left:10px">Is Accepted</th>
+                                   @*<th></th>*@
+                                </tr>
+                            </thead style="line-height:0.5rem">
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="row" style="display:none">
+                    <div class="col-md-12 float-right">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-info" id="btn-callPlan-approve">Approve</button>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

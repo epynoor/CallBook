@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="loading" data-textdirection="ltr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Call Book System</title>  
+    <base href="~/" />
+    <link rel="apple-touch-icon" href="app-assets/images/ico/apple-icon-120.png">
+    <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico">
+    <link rel="stylesheet" href="~/css/googlefonts.css" >
+    <partial name="_Styles" />
+</head>
+<body class="horizontal-layout horizontal-menu 2-columns" data-open="hover" data-menu="horizontal-menu" data-color="bg-gradient-x-purple-blue" data-col="2-columns">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <header>
+            <partial name="/Views/Shared/NavBar.cshtml">
+        </header>
+        <partial name="/Views/Shared/Menu.cshtml" />
+    }
+
+    <input id="privkey" hidden value="MIICWwIBAAKBgQC5PlDj1xACkUEuvnMYEFyuTFNFKt/GgpB7/dtEj1EOJ3q4gRY6
+DHVhT6Peik0pQxewLe3JDuMnMoRmHl6mkH9dLs4MNVUtW4QMUzoBT11HArtDsTrA
+y0wJkkqZhQD1B21in7VD29x4sOL9wCkGat9bMVAai3oKVsjZnIILjSFc8QIDAQAB
+AoGARSMo9aBy7UJhXZzfP//7V2JNQed6lZBtdJmOmMwUqH+7odkr/oZf2O3sb0aW
+/et4j9zUftH7ncmQ+Lwk/2222uE4QtbXipgV29T0Gc9aAR2JFzBYlOYfFsM20okP
+nohMiXyldNChaa960cY/84Q71w1nMxrgtZE5ahW1IjjhnwECQQDu7YL/TX/J5qQx
+3EeFoBw8uFSvc69vevWVCZ+j0d2uDQq9K5/iqoHlDCRRfl+kHGiVoR/CdN+9S3pl
+jlNOx+/pAkEAxnrOIQf0vfHDnb7dIJE/H9Q/VFYa4BuhDDmBhWUZscL08n++yVzk
+fgIfthGpM93U/0FKOMy6jPDsrua+FV2nyQJAU1Y+yePzPa4X+Vg3DjHBh6BX0XbN
+a1n9DMX1i8Noygu8gi0UMJB+jDDG/jHRFEHgbMhtdnsjizgncgLJpgHw+QJAEOby
+WNPBns9Q1kUjtZtI4eAESJ1QipcvvsfC5OY4KvAsRd5lE+bKOoTZyHp2i0kv01Dv
+Dik5FbmKnlZeB5nDKQJAPb2baDmHNV+0XemWHRGPptDQVxnSuCKGeaiduW6zw//4
+M02QPoYub76xLdLEa2iHcXBGEEQ/3yD0LMwOtzi+og==" />
+    <input id="pubkey" hidden />
+    <div class="app-content content">
+        <div class="content-wrapper pt-0">
+            <div class="content-body">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <partial name="/Views/Shared/Footer.cshtml" />
+    }
+
+    <partial name="_Scripts" />
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

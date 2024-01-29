@@ -1,0 +1,325 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/Template/_Layout.cshtml";
+}
+<style>
+    
+</style>
+
+
+
+<div class="font-medium-2 font-weight-bold  text-center app-name1">
+    Dashboard
+</div>
+<br />
+<!-- Content Wrapper. Contains page content -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>30</h3>
+
+                        <p>Total Queue</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-bag"></i>
+                    </div>
+                    <a href="/CallPlanApprove#custom-content-approved-list" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>20</h3>
+
+                        <p>Shceduled Call</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-stats-bars"></i>
+                    </div>
+                    <a href="/CallSchedule" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>10</h3>
+
+                        <p>Todays Call</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-person-add"></i>
+                    </div>
+                    <a href="/CallReport" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>5</h3>
+
+                        <p>Pending Approval</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-pie-graph"></i>
+                    </div>
+                    <a href="/CallPlanApprove#custom-content-waiting-List" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+        </div>
+
+
+    </div>
+
+    <div class="card card-default ">
+        <div class="card-header">
+            <div class="font-medium-2 font-weight-bold  text-center app-name1" style="margin-left: -3px;">
+                Today Call Schedule
+            </div>
+            @* <h3 class="card-title">Today Call Schedule</h3>*@
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="card-content schedule-scroll">
+                <div id="call-schedule" class="media-list position-relative " style="width: 98%">
+                
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TO DO List -->
+
+    
+    <div class="card" id="todo-list">
+       
+    </div>
+
+</section>
+
+
+
+
+<partial name="_CallPlanApprove" />
+
+@section Scripts
+{
+<script>
+
+    $('#callplan-list-table').on('click', '.row-dismiss', function() {
+
+        var rowData = table.row($(this).parents('tr')).data();
+
+        $.confirm({
+            title: 'Confirm!',
+
+            content: '<p>Are you sure to dismiss the scheduled call?</p>' +
+                '<div class="form-group">' +
+                '<label>Enter Remarks</label>' +
+                '<input type="text" placeholder="Remarks" class="remark form-control" required />' +
+                '</div>' ,
+            buttons: {
+                confirm: function () {
+
+                    var remarks = this.$content.find('.remark').val();
+                    if(!remarks){
+                        $.alert('provide Dismiss remarks');
+                        return false;
+                    }
+
+                    var request = {
+                        id: rowData["id"],
+                        remarks: remarks
+                    }
+
+                    console.log(request);
+
+                    $.ajax({
+                        url: "/CallReport/DismissCallPlan",
+                        type: "POST",
+                        data: request ,
+                        success: function (data) {
+
+                            if (data.status == true) {
+                                toastr.success("message", data.message);
+                                loadAcceptedCallPlanList();
+                            }
+                            else {
+                                toastr.error("Error", data.message);
+                                $.alert(data.message);
+                            }
+                        }
+                    });
+
+
+
+                },
+                cancel: function () {
+
+                }
+            }
+        });
+
+    } )
+
+    LoadCallScheduleView();
+
+    function LoadCallScheduleView() {
+        $.ajax({
+            url: "@Url.Action("GetCallScheduleView", "CallReport")",
+            success: function (data) {
+                $("#call-schedule").html(data);
+            }
+        });
+    }
+
+    LoadTodoListView(1, 5);
+    function LoadTodoListView(pageNumber, pageSize) {
+        $.ajax({
+            url: "@Url.Action("GetTodoListView", "CallPlanApprove")",
+            "data": {status: 'INITIATED', pageSize: pageSize, pageNumber: pageNumber  },
+            success: function (data) {
+                $("#todo-list").html(data);
+            }
+        });
+    }
+
+
+    $(document).on('click', '.row-edit', function() {
+
+        var rowData = $(this).data("name"); //table.row($(this).parents('tr')).data();
+
+        
+
+             $('#UPurpose').attr('readonly', false);
+             $('#USubject').attr('readonly', false);
+             $('#UName').attr('readonly', false);
+             //$('#UCIF').attr('readonly', false);
+             $('#UCategoryId').attr('disabled', false);
+             $('#UCallTypeId').attr('disabled', false);
+
+
+            $('#UName').val($(this).data("name"));
+
+            $('#UCategoryId').html('');
+             var optionState ='';
+             optionState ='<option value="' + $(this).data("category-id") +'">' + $(this).data('category-name') +'</option>';
+             $('#UCategoryId').append(optionState);
+
+
+             $('#UCallTypeId').html('');
+             var optionState ='';
+             optionState ='<option value="' + $(this).data('call-type-id') +'">' + $(this).data('call-type-name') +'</option>';
+             $('#UCallTypeId').append(optionState);
+
+             var leadType=$('#UCallTypeId').text();
+             if(leadType=='New')
+             {
+               $('#UCIF').attr('disabled',true);
+             }else{$('#UCIF').attr('disabled',false);}
+
+            $('#UCIF').val($(this).data('cif'));
+
+            $('#USubject').val($(this).data('subject'));
+            $('#UPurpose').val($(this).data('purpose'));
+            $('#UTentativeDate').val($(this).data('tentative-date'));
+            $('#UtempId').val($(this).data('id'));
+
+
+            $("#callPlan-update-modal").modal('show');
+        } )
+
+    function CloseModalPopup() {       
+            $("#callPlan-update-modal").modal('hide');
+    }
+
+    $('#callPlan-update-modal').on('click', '#btn-callPlan-approve', function () {
+
+        let id=$("#UtempId").val();
+
+            $.confirm({
+            title: 'Confirm!',
+            content: 'Are you sure to approve?',
+            buttons: {
+                confirm: function () {
+
+                    $.ajax({
+                        url: "/CallPlanApprove/ApprovePlan",
+                        type: "POST",
+                        data:{id:id},
+                        success: function (data) {
+
+                            if (data.status == true) {
+                                toastr.success("message", data.message);
+                                $("#callPlan-update-modal").modal('hide');
+                                clearModal();
+                                LoadTodoListView(1,5);
+                                   
+                            }
+                            else {
+                                toastr.error("Error", data.message);
+                                $.alert(data.message);
+                            }
+                        }
+                    });
+
+                },
+                cancel: function () {
+
+                }
+            }
+        });
+
+    });
+
+
+      function clearModal() {
+            $('#UCategoryId').val(null).trigger("change");
+            $('#UCallTypeId').val(null).trigger("change");
+            $('#UCIF').val('');
+            $('#UName').val('');
+            $('#USubject').val('');
+            $('#UPurpose').val('');
+            $('#UTentativeDate').val('');
+            $('#UtempId').val('');
+           // $('#btn-Temp-Add').text('Add Plan');
+        }
+
+
+    $(document).on('click', '.page-link', function () {
+        
+        pageNo = $(this).data('page-number');
+        LoadTodoListView(pageNo, 5);
+        $(this).parent().addClass("active");
+    });
+
+$(
+    function() {
+        var $listItems = $('.pagination-sm li');
+
+          $listItems.click(function(){
+          $listItems.removeClass('active');
+          $(this).addClass('active');  
+          var activeLink=$(this);////  store in variable and do work on pev next btn
+          });
+    }
+  
+);
+</script>
+}

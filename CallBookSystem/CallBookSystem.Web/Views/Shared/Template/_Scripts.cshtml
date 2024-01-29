@@ -1,0 +1,115 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<!-- REQUIRED SCRIPTS -->
+<!-- jQuery -->
+<script src="~/lib/jquery/jquery.min.js"></script>
+<script src="~/lib/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="~/lib/jquery-validation/jquery.validate.min.js"></script>
+<script type="text/javascript" src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="~/js/adminlte.min.js"></script>
+
+<!-- Toastr -->
+<script src="~/lib/toastr/toastr.min.js"></script>
+<script type="text/javascript" src="~/lib/select2/js/select2.js"></script>
+
+<script type="text/javascript" src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="~/lib/datatables-button/js/dataTables.buttons.min.js"></script>
+
+<script type="text/javascript" src="~/lib/jquery-confirm/jquery-confirm.min.js"></script>
+
+<script type="text/javascript" src="~/js/dataTables.dateTime.min.js"></script>
+
+<script src="~/lib/momentjs/moment.min.js"></script>
+<script src="~/js/bootstrap-datepicker.js"></script>
+<script src="~/js/bs-custom-file-input.min.js"></script>
+<script src="~/js/daterangepicker.js"></script>
+
+
+<script>
+
+        $(document).ready(function () {
+    @if (TempData.ContainsKey("ErrorMessage"))
+    {
+        @:toastr.error('@TempData["ErrorMessage"]');
+    };
+        });
+
+   $(function () {
+      bsCustomFileInput.init();
+    });
+
+        //$(document).ajaxSend(function (event, xhr, options) {
+
+        //    $('.spinner').css('display', 'block');
+
+        //}).ajaxComplete(function (event, xhr, options) {
+
+        //    $('.spinner').css('display', 'none');
+
+        //}).ajaxError(function (event, jqxhr, settings, exception) {
+
+        //    $('.spinner').css('display', 'none');
+
+        //});
+
+        //$(window).on('load', function () {
+        //    $('.spinner').css('display', 'none');
+        //});
+
+
+        // Remove active for all items.
+        $('.page-sidebar-menu li').removeClass('active');
+
+        // highlight submenu item
+        $('li a[href="' + this.location.pathname + '"]').parent().addClass('active');
+
+        // Highlight parent menu item.
+        $('ul a[href="' + this.location.pathname + '"]').parents('li').addClass('active');
+</script>
+
+<script>
+    $.ajaxSetup({  // handle ajax errors
+        error: function (jqXHR, exception) {
+
+            console.log(jqXHR);
+
+            if (jqXHR.statusText =='abort' && jqXHR.status != 401) {
+                return;
+            }
+
+            else if (jqXHR.status === 0) {
+                $.alert('Network Problem.');
+            }
+
+            else if (jqXHR.status == 401) {
+                $.alert("You have been logged out. Please login again.");
+                window.location = '/Login/Index';
+            }
+
+            else if (jqXHR.status == 403) {
+                $.alert("You don't have access of the following action.");
+            }
+
+            else if (jqXHR.status == 404) {
+                $.alert("Content not found.");
+            }
+
+            else if (jqXHR.status == 500) {
+                $.alert("Problem in processing the request."+' Internal error: ' + jqXHR.responseText);
+            }
+
+            else if (exception === 'timeout') {
+                $.alert("Request timed out.");
+            }
+            else {
+                toastr.error("Error", 'Unexpected error: ' + jqXHR.status);
+            }
+        }
+    });
+</script>
+
+

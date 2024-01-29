@@ -1,0 +1,140 @@
+﻿
+<div id="callreport-entry-modal">
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Calling Officer: </label>
+        <div class="col-sm-10">
+            <label style="font-size:12px;padding:0px;font-weight:600;" id="lblCallingOfficer"></label>            
+             <button type="button" class="btn btn-primary btn-sm" id="btn-officer-Add" style="padding:1px">More +</button>
+        </div>       
+    </div>
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Business Unit</label>
+        <div class="col-sm-4 ">
+            <input type="text" id="txtBusinessUnit" class="form-control form-control-sm" value="@User.Claims.Where(c => c.Type == "UnitName").FirstOrDefault().Value" autocomplete="off" style="width: 100%;" readonly>
+        </div>
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Area/Region </label>
+        <div class="col-sm-4 ">
+            <input type="text" id="txtRegion" class="form-control form-control-sm" value="@User.Claims.Where(c => c.Type == "Location").FirstOrDefault().Value" autocomplete="off" style="width: 100%;" readonly>
+        </div>
+        
+    </div>
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Visit Date </label>
+        <div class="col-sm-4 ">
+            <input type="text" id="txtVisitDate" class="form-control form-control-sm" value="@DateTime.Today.ToString("dd-MMM-yyyy")" autocomplete="off" style="width: 100%;">
+        </div>
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Date </label>
+        <div class="col-sm-4 ">
+            <input type="text" id="txtDate" class="form-control form-control-sm" value="@DateTime.Today.ToString("dd-MMM-yyyy")" autocomplete="off" style="width: 100%;" readonly>
+        </div>
+    </div>
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Category  <span class="text-danger ml-005">*</span></label>
+        <div class="col-sm-4 ">
+            <select id="CategoryId" class=" form-control form-control-sm select2" placeholder="Enter Type" style="width: 100%;">
+            </select>
+        </div>
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Lead Type <span class="text-danger ml-005">*</span></label>
+        <div class="col-sm-4 ">
+            <select id="leadType" class=" form-control form-control-sm select2" placeholder="Enter Type" style="width: 100%;">
+            </select>
+        </div>
+    </div>
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">CIF </label>
+        <div class="col-sm-4 ">
+            <input type="hidden" id="hdnCallId" />
+            <input type="hidden" id="hdnCallPlanId" />
+            <input type="hidden" id="hdnPlanBatchId" />
+            <input type="text" id="txtCIF" class="form-control form-control-sm" placeholder="Enter CIF" autocomplete="off" style="width: 100%;">
+        </div>
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Client <span class="text-danger ml-005">*</span></label>
+        <div class="col-sm-4 ">
+            <input type="text" id="txtCustName" class="form-control form-control-sm" placeholder="Enter Name" autocomplete="off" style="width: 100%;">
+        </div>
+        
+    </div>
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Address </label>
+        <div class="col-sm-10 ">
+            <textarea rows="1" id="txtAddress" class="form-control form-control-sm" placeholder="Enter Address" autocomplete="off"> </textarea>
+        </div>
+    </div>
+    
+    
+    <hr />
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Person Contacted <span class="text-danger ml-005">*</span></label>
+        <div class=" col-sm-4 ">
+            <select id="txtPersonContacted" class=" form-control form-control-sm select2" placeholder="Enter Type" style="width: 100%;">
+            </select>
+        </div>
+        <div class="col-sm-1">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-person-Add" style="padding:1px">Add</button>
+        </div>
+        <label class="col-sm-1 col-form-label-sm text-right" style="font-size:12px">Status <span class="text-danger ml-005">*</span></label>
+        <div class=" col-sm-4 ">
+            <select id="callReportStatus" class=" form-control form-control-sm select2" placeholder="Enter Call Status" style="width: 100%;">
+            </select>
+        </div>
+    </div>
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Call Subject <span class="text-danger ml-005">*</span></label>
+        <div class="col-sm-10">
+            <input type="text" id="txtSubject" class="form-control form-control-sm" placeholder="Enter Subject" autocomplete="off" style="width: 100%;">
+        </div>
+    </div>
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Call Summary <span class="text-danger ml-005">*</span></label>
+        <div class="col-sm-10">
+            <textarea rows="5"  id="txtSummary"></textarea>
+        </div>
+    </div>
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Action Plan</label>
+        <div class="col-sm-10">
+            <textarea rows="5"  id="txtActionPlan"></textarea>
+        </div>
+    </div>
+
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Followup Date(Optional) </label>
+        <div class="col-sm-4">
+            <input type="text" id="txtNextFollowupDate" class=" form-control form-control-sm" placeholder="(dd-MMM-yyyy)" autocomplete="off" style="width: 100%;" >
+        </div>
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Followup Note(Optonal) </label>
+        <div class="col-sm-4">
+            <input type="text" id="txtFollowupNote" class=" form-control form-control-sm"  autocomplete="off" style="width: 100%;" >
+        </div>
+    </div>
+    <div class="form-group row" style="margin-bottom:0.3rem">
+        <label class="col-sm-2 col-form-label-sm text-right" style="font-size:12px">Attatch File(s)</label>
+        <div class=" col-sm-10 ">
+            <input id="fileInput" type="file" multiple>  
+            <br />            <br />    
+            <table class="table table-sm" id="FilesList" style="visibility:hidden">  
+                <tr>  
+                    <th>  
+                        Attachment(s)  
+                    </th>  
+                    <th>  
+                        Action  
+                    </th>  
+                </tr>  
+            </table>            
+        </div>
+    </div>
+    
+    
+    <hr />
+
+    <div class="row" style="text-align:center">
+        <div class="col-md-12 float-right">
+            <div class="form-group">
+                <button type="button" class="btn btn-info" id="btn-call-report-submit">Submit Report</button>
+                @*<button type="button" class="btn grey btn-secondary" data-dismiss="modal">Close</button>*@
+            </div>
+        </div>
+    </div>
+</div>
+

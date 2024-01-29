@@ -1,0 +1,796 @@
+﻿@{
+    ViewData["Title"] = "CallReportEntry";
+    Layout = "~/Views/Shared/Template/_Layout.cshtml";
+}
+
+<br />
+<div class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">Call Report Entry</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-content">
+                    <partial name="_CallReportEntryField" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_CallingOfficerAdd" />
+<partial name="_PersonContactedEntry"/>
+
+
+@section Scripts
+{
+    <script src="~/lib/summernote/summernote.min.js"></script>
+    @*<script src="~/lib/dropzone/dropzone.min.js"></script>
+    <script src="~/js/call-report-dropzone.js"></script>*@
+    <script src="~/js/call-report-fileUpload.js"></script>
+
+<script>
+
+$('#txtSummary').summernote()
+$('#txtActionPlan').summernote()
+
+$(function () {
+    $('#txtVisitDate').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        format: "dd-M-yyyy",
+        language: "tr",
+        autoclose: true,
+        endDate: "+0d"
+    });
+});
+
+$(function () {
+    $('#txtNextFollowupDate').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        format: "dd-M-yyyy",
+        language: "tr",
+        autoclose: true,
+        startDate: "+0d"
+    });
+});
+
+$(
+    function loadCallReportStatus() {
+        debugger;
+        $.ajax({
+            "url": "/CallReportEntry/GetCallReportStatusList",
+            "type": "GET",
+            "dataType": "json",
+            "success": function(data, status, xhr) {
+                callReportStatuses = data.data;
+
+                $("#callReportStatus").select2({
+                    multiple: false,
+                    delay: 250,
+                    cache: true,
+                    templateSelection: function(state) {
+                        if (state.id) {
+                            return state.name ? state.name : state.text;
+                        }
+                    },
+                    data: callReportStatuses.map(function(item) {
+                        return {
+                            id: item,
+                            text: item.replace("_"," ").replace("_"," ")
+                        };
+                    })
+                })
+            }
+        });
+    });
+
+var pageSize = 5;
+$("#leadType").select2({
+    multiple: false,
+    delay: 250,
+    cache: true,
+    placeholder: "Select a Call Type",
+    templateSelection: function (state) {
+        if (state.id) {
+            return state.name ? state.name : state.text;
+        }
+    },
+    ajax: {
+        url: "/CallType/CallTypeFilter",
+        data: function (params) {
+            var query = {
+                term: isNaN(params.term) ? params.term : "",
+                pageNumber: params.page || 1,
+                pageSize: pageSize
+            };
+            return query;
+        },
+        dataType: 'json',
+        processResults: function (response, params) {
+
+            selectData = {};
+            params.page = params.page || 1;
+            selectData = response.data.map(function (item) {
+                return {
+                    id: item.id,
+                    text: item.name
+                };
+            });
+            //hideLoader();
+            return {
+                results: selectData,
+                pagination: {
+                    more: (params.page * pageSize) < response.total
+                }
+            };
+        }
+    },
+
+    allowClear: true
+
+});
+
+$("#CategoryId").select2({
+        multiple: false,
+        delay: 250,
+        cache: true,
+        placeholder: "Select a Lead Type",
+        templateSelection: function (state) {
+            if (state.id) {
+                return state.name ? state.name : state.text;
+            }
+        },
+        ajax: {
+            url: "/Category/CategoryFilterByProcess",
+            data: function (params) {
+                var query = {
+                    categoryName: (!params.term) ? "" : params.term,
+                    pageNumber: params.page || 1,
+                    pageSize: pageSize
+                };
+                return query;
+            },
+            dataType: 'json',
+            processResults: function (response, params) {
+                
+                selectData = {};
+                params.page = params.page || 1;
+                selectData = response.data.map(function (item) {
+                    return {
+                        id: item.id,
+                        text: item.categoryName                       
+                    };
+                });
+                //hideLoader();
+                return {
+                    results: selectData,
+                    pagination: {
+                        more: (params.page * pageSize) < response.total
+                    }
+                };
+            }
+        },
+        
+        allowClear: true
+
+    });
+
+var loadSize = 10;
+
+$("#PinId").select2({
+    multiple: false,
+    delay: 250,
+    cache: true,
+    templateSelection: function (state) {
+        if (state.id) {
+            return state.name ? state.name : state.text;
+        }
+    },
+    ajax: {
+        url: "/UserManagement/LoadUser",
+        data: function (params) {
+            
+            var query = {
+                id: (!params.term) ?  "" : params.term,
+                empName: (!params.term)  ?  "" : params.term,
+                pageNumber: params.page || 1,
+                loadSize: loadSize
+            };
+            
+            return query;
+        },
+        dataType: 'json',
+        processResults: function (response, params) {
+
+            selectData = {};
+            params.page = params.page || 1;
+            selectData = response.data.map(function (item) {
+                return {
+                    id: item.empId,
+                    //id:item.id,
+                    text: item.empName
+                };
+            });
+            //hideLoader();
+            return {
+                results: selectData,
+                pagination: {
+                    more: (params.page * loadSize) < response.total
+                }
+            };
+        }
+    },
+    placeholder: "Select a Pin",
+    allowClear: true,
+    dropdownParent: $("#callreport-entry-OfficerModel")
+
+});
+
+$(document).on('select2:open', () => {
+    document.querySelector('.select2-search__field').focus();
+});
+
+
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
+    return false;
+};
+
+getCallReportInfo('-1');
+LoadCIFNameEntry();
+
+function getCallReportInfo(callId) {
+
+    var cid = getUrlParameter('callId');
+    if (cid) {
+        callId = cid;
+    }
+   
+    
+    if (callId != '-1') {
+        $.ajax({
+            "url": "/CallReportEntry/GetCallReport",
+            "type": "GET",
+            "data": { callId : callId },
+            "dataType": "json",
+            "success": function(data, status, xhr) {
+                callReport = data.data;
+
+                console.log(callReport);
+
+                $('#txtCIF').val(callReport.cif);
+                $('#txtCustName').val(callReport.name);
+                $('#txtSubject').val(callReport.subject);
+                $('#hdnCallId').val(callReport.callId);
+
+                $('#hdnCallPlanId').val(callReport.planCallId);
+                $('#hdnPlanBatchId').val(callReport.planBatchNo);
+                $('#txtAddress').val(callReport.address);
+
+                var optionState ='';
+                optionState ='<option value="' + callReport.categoryId +'">' + callReport.categoryName +'</option>';
+                $('#CategoryId').append(optionState);
+
+                var optionState ='';
+                optionState ='<option value="' + callReport.callTypeId +'">' + callReport.callTypeName +'</option>';
+                $('#leadType').append(optionState);
+
+
+            }
+        });
+
+    }
+
+    else{
+        var callPlanId = getUrlParameter('callPlanId');
+        
+        if (callPlanId) {
+            $.ajax({
+            "url": "/CallPlan/GetCallPlanById",
+            "type": "POST",
+            "data": { id : callPlanId },
+            "dataType": "json",
+            "success": function(data, status, xhr) {
+                callReport = data.data;
+
+                console.log(callReport);
+
+                $('#txtCIF').val(callReport.cif);
+                $('#txtCustName').val(callReport.name);
+                $('#txtSubject').val(callReport.subject);
+                $('#hdnCallPlanId').val(callReport.callPlanId);
+                $('#hdnPlanBatchId').val(callReport.batchNo);
+
+                var optionState ='';
+                optionState ='<option value="' + callReport.categoryId +'">' + callReport.categoryName +'</option>';
+                $('#CategoryId').append(optionState);
+
+                var optionState ='';
+                optionState ='<option value="' + callReport.callTypeId +'">' + callReport.callTypeName +'</option>';
+                $('#leadType').append(optionState);
+
+
+            }
+        });
+        }
+    }
+}
+
+loadCallingOfficerList('-1');
+
+$('#callreport-entry-modal').on('click', '#btn-officer-Add', function () {
+    bindCallingOfficerGrid();
+    $("#callreport-entry-OfficerModel").modal('show');
+});
+
+$('#callreport-entry-modal').on('click', '#btn-person-Add', function () {
+    $('#txtPersonName').val('');
+    $('#txtRelation').val('');
+    $('#txtContactNumber').val('');
+    $('#txtAddress').val('');
+    $("#person-entry-Model").modal('show');
+});
+
+var callingOfficer =[];
+var table;
+function loadCallingOfficerList(callId) {
+    
+    var cid = getUrlParameter('callId');
+    if (cid) {
+        callId = cid;
+    }
+    
+
+    debugger;
+    $.ajax({
+        "url": "/CallReportEntry/GetCallingOfficerList",
+        "type": "GET",
+        "data": { callId : callId },
+            "dataType": "json",
+            "success": function(data, status,xhr){
+                callingOfficer = data.data;
+                
+                callingOfficersPin = '';
+                for (i = 0; i < callingOfficer.length; i++ )
+                {
+                    if (callingOfficersPin.length > 0) {
+                        callingOfficersPin = callingOfficersPin + ',' + callingOfficer[i].empPin;
+                    }
+                    else {
+                        callingOfficersPin = callingOfficer[i].empPin;
+                    }
+                }
+                $('#lblCallingOfficer').text(callingOfficersPin+'...');
+            }
+        });
+}
+
+function bindCallingOfficerGrid(){
+
+    callingOfficersPin = '';
+    for (i = 0; i < callingOfficer.length; i++ )
+    {
+        if (callingOfficersPin.length > 0) {
+            callingOfficersPin = callingOfficersPin + ',' + callingOfficer[i].empPin;
+        }
+        else {
+            callingOfficersPin = callingOfficer[i].empPin;
+        }
+    }
+    $('#lblCallingOfficer').text(callingOfficersPin+'...');
+
+    $('#callentry-report-table').DataTable().destroy();
+
+        table =  $('#callentry-report-table').DataTable({
+
+            "language": {
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+            },
+            "filter": false,
+            "paging": false,
+            "pageLength": 10,
+            "lengthChange": false,
+            "pagingType": "full_numbers",
+            "scrollX": false,
+            "autoWidth": true,
+            "data": callingOfficer,
+        // },
+            "columns": [
+                { "data": "empPin", "name": "EmpPin" },
+                { "data": "empName", "name": "EmpName" },
+            ],
+
+        });
+}
+
+$('#callreport-entry-OfficerModel').on('click', '#btn-callingOfficer-Add', function () {
+        var pin = $('#PinId').val();
+        if(!pin || pin ==''){
+            toastr.error('PIN is requried!!!');
+            //$.alert('PIN is requried!!!');
+            return;
+        }
+        var emp = $('#PinId').text();
+        var empname=emp.split(' (')[0];
+
+        var exists = callingOfficer.filter( function(item){return (item.empPin==pin);} )[0];
+
+        if(!exists){
+            callReport ={
+                empPin: pin,
+                empName:empname
+            }
+            callingOfficer.push(callReport);
+            bindCallingOfficerGrid();
+        }
+        $('#PinId').text('');
+});
+
+
+addedContactPerson = []
+
+loadContactPersonList('-1');
+
+function loadContactPersonList(callId) {
+
+    var cid = getUrlParameter('callId');
+    if (cid) {
+        callId = cid;
+    }
+    
+
+    debugger;
+        $.ajax({
+            "url": "/CallReportEntry/GetCallReportContactPerson",
+            "type": "POST",
+            "dataType": "json",
+            "data": {callId:callId},
+            "success": function(data, status,xhr){
+                addedContactPerson = data.data;
+
+                $("#txtPersonContacted").select2({
+                    multiple: false,
+                    delay: 250,
+                    cache: true,
+                    templateSelection: function (state) {
+                        if (state.id) {
+                            return state.name ? state.name : state.text;
+                        }
+                    },
+                    data: addedContactPerson.map(function (item) {
+                                return {
+                                    id: item.contactPerson,                    
+                                    text: item.contactPerson
+                                };
+                            })
+                })
+                
+            }
+        });
+}
+
+$('#person-entry-Model').on('click', '#btn-person-add', function () {
+        var name = $('#txtPersonName').val();
+        var relation = $('#txtRelation').val();
+        var contactNumber = $('#txtContactNumber').val();
+        var address = $('#txtAddress').val();
+
+
+        if(!name || name ==''){            
+            $.alert('Name is requried!!!');
+            return;
+        }
+
+                 
+    person ={
+        contactPerson: name,
+        contactNumber:contactNumber,
+        relation: relation,
+        address: address
+    }
+    addedContactPerson.push(person);
+    
+    $('#txtPersonName').val('');
+    $('#txtRelation').val('');
+    $('#txtContactNumber').val('');
+    $('#txtAddress').val('');
+
+    $("#person-entry-Model").modal('hide');
+
+    $("#txtPersonContacted").select2({
+        multiple: false,
+        delay: 250,
+        cache: true,
+        templateSelection: function (state) {
+            if (state.id) {
+                return state.name ? state.name : state.text;
+            }
+        },
+        data: addedContactPerson.map(function (item) {
+                    return {
+                        id: item.contactPerson,                    
+                        text: item.contactPerson
+                    };
+                })
+    })
+
+});
+
+$("#txtPersonContacted").select2({
+    multiple: false,
+    delay: 250,
+    cache: true,
+    templateSelection: function (state) {
+        if (state.id) {
+            return state.name ? state.name : state.text;
+        }
+    },
+    data: addedContactPerson.map(function (item) {
+                return {
+                    id: item.contactPerson,                    
+                    text: item.contactPerson
+                };
+            })
+})
+
+
+$('#callreport-entry-modal').on('click', '#btn-call-report-submit', function() {
+
+    var PersonContacted = $('#txtPersonContacted').val();
+    if (!PersonContacted) {
+        toastr.error('Contacted Person is requried!!!');
+        $.alert('Contacted Person is requried!!!');
+        return;
+    }
+
+    var custName = $('#txtCustName').val();
+    if (!custName) {
+        toastr.error('Customer Name is requried!!!');
+        $.alert('Customer Name is requried!!!');
+        return;
+    }
+
+    var visitDate = $('#txtVisitDate').val();
+    if (!visitDate) {
+        toastr.error('Visit Date is requried!!!');
+        $.alert('Visit Date is requried!!!');
+        return;
+    }
+
+    var categoryId = $('#CategoryId').val();
+    if (!categoryId) {
+        toastr.error('Category is requried!!!');
+        $.alert('Category is requried!!!');
+        return;
+    }
+
+    var callTypeId = $('#leadType').val();
+    if (!callTypeId) {
+        toastr.error('Lead Type is requried!!!');
+        $.alert('Lead Type is requried!!!');
+        return;
+    }
+
+    var status = $('#callReportStatus').val();
+    if (!status) {
+        toastr.error('Status is requried!!!');
+        $.alert('Status is requried!!!');
+        return;
+    }
+
+    var subject = $('#txtSubject').val();
+    if (!subject) {
+        toastr.error('Subject is requried!!!');
+        $.alert('Subject is requried!!!');
+        return;
+    }
+
+    var summary = $('#txtSummary').val();
+    if (!summary) {
+        toastr.error('Summary is requried!!!');
+        $.alert('Summary is requried!!!');
+        return;
+    }
+
+    var callId = $('#hdnCallId').val();
+
+    actionType = 'CallActivityEntry'
+
+    if (!callId) {
+        callId = '';
+        actionType = 'NewCallEntry';
+    }    
+
+    planBatchNo = $('#hdnPlanBatchId').val();
+    if (!planBatchNo) {
+        planBatchNo = '';        
+    }    
+
+    planCallId = $('#hdnCallPlanId').val();
+    if (!planCallId) {
+        planCallId = '';        
+    }    
+
+    clientGroup = '';
+    activityId = '';
+
+
+    $.confirm({
+            title: 'Confirm!',
+            content: 'Are you sure to save?',
+            buttons: {
+                confirm: function () {
+                    var reportActivity = {
+                        CallId: callId,
+                        CallDate: visitDate,
+                        PlanBatchNo: planBatchNo,
+                        PlanCallId: planCallId,
+                        CategoryId: categoryId,
+                        CallTypeId: callTypeId,
+                        Subject: subject,
+                        ClientGroup: clientGroup,
+                        CIF: $('#txtCIF').val(),
+                        Name: custName,
+                        FirstCallDate: visitDate,
+                        NextFollowUpDate: $('#txtNextFollowupDate').val(),
+                        FollowUpNote: $('#txtFollowupNote').val(),
+                        Summary: $('#txtSummary').val(),
+                        ActionPlan: $('#txtActionPlan').val(),
+                        ContactPerson: PersonContacted,
+                        ActivityId: activityId,
+                        Status: status,
+                        Address: $("#txtAddress").val()
+                    }
+                    
+                    var callReport = {
+                        ReportActivity: reportActivity,
+                        ContactPersons: addedContactPerson,
+                        CallingOfficers: callingOfficer,
+                        ActionType : actionType
+                    }
+
+                    $.ajax({
+                        url: "/CallReportEntry/SaveCallReportActivity",
+                        type: "POST",
+                        data: { callReport: callReport },
+                        success: function (data) {
+                            if (data.status == true) {     
+                                
+                                activityId = data.activityId;
+                                callId = data.callId;
+
+                                $.ajax({
+                                    url: "/CallReportEntry/FileUpload?callId="+callId+"&activityId="+activityId,
+                                    type: "POST",
+                                    contentType: false, // Not to set any content header  
+                                    processData: false, // Not to process data  
+                                    data: formdata, 
+                                    success: function (data) {
+                                        if (data.status == true) {     
+                                
+                                            activityId = data.activityId;
+                                            callId = data.callId;
+
+
+                                            $.alert(data.message);  
+                                            
+                                            cId =  getUrlParameter('callId');
+                                            cpId =  getUrlParameter('callPlanId');
+
+                                            if (cId || cpId) {
+                                                var url = '@Url.Action("Index", "CallReportEntry")';
+                                                window.location.href = url;
+                                                return;
+                                            }
+
+                                            clearForm();
+                                            formdata = new FormData();
+                                            chkatchtbl();
+                                        }
+                                        else {
+                                            toastr.error("Error", data.message);
+                                            $.alert(data.message);
+                                        }
+                                    }
+                                });                               
+                            }
+                            else {
+                                toastr.error("Error", data.message);
+                                $.alert(data.message);
+                            }
+                        }
+                    });
+
+                },
+                cancel: function () {
+                    
+                }
+            }
+        }); 
+
+   
+
+    
+
+});
+
+  function LoadCIFNameEntry(){
+           $('input#txtCIF').on("blur",function(){
+
+                 let cif = $("#txtCIF").val();
+                 if(cif==null || cif.trim().length<1)
+                 {
+                   alert('Enter CIF Id!');
+                 }
+                 else{
+                    $.ajax({
+                    url: "/CallReportEntry/getCIFName",
+                    type: "GET",
+                    contentType: "application/json;charset=UTF-8",
+                    data: {
+                        'cif': cif
+
+                    },
+                    dataType: "json",
+                    success: function (result) {
+                        console.log(result);
+                        if(result.data == null)
+                        {
+                          alert('Invalid CIF!');
+                        }else{
+                          $('#txtCustName').val(result.data.acct_name);
+                        }
+                           
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    }
+                });
+                 }
+                           
+          });
+     }
+
+function clearForm() {
+        $('#CategoryId').val(null).trigger("change");
+        $('#leadType').val(null).trigger("change");
+        $('#txtPersonContacted').val(null).trigger("change");
+        $('#callReportStatus').val('INITIATED').trigger("change");
+        $('#txtCIF').val('');
+        $('#txtCustName').val('');
+        $('#txtAddress').val('');
+        $('#txtSubject').val('');
+        $('#txtSummary').summernote("reset");
+        $('#txtActionPlan').summernote("reset");
+
+        $('#txtNextFollowupDate').val('');
+        $('#txtFollowupNote').val('');
+        $('#lblCallingOfficer').text('...');
+        callingOfficer =[];
+        addedContactPerson = [];
+    }
+
+
+
+</script>
+ }

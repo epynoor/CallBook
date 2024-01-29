@@ -1,0 +1,379 @@
+﻿@{
+    ViewData["Title"] = "User Management";
+    Layout = "~/Views/Shared/Template/_Layout.cshtml";
+}
+
+<br />
+<div class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                 <h3 class="card-title">User <small>Management</small> </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>            
+            <div class="card-body">  
+                <div class="card-content">
+                    <div id="product-summary" class="media-list position-relative">
+                        <div class="table-responsive">
+                            <table class="table table-padded table-xl mb-0 w-100" id="usermanagement-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Process Name</th>
+                                        <th>User Name</th>
+                                        <th>Is Admin</th>
+                                        <th>Entry By</th>
+                                        <th>Entry Date</th>
+                                        <th>Updated By</th>
+                                        <th>Updated Date</th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>              
+            </div>
+        </div>
+    
+    </div>
+</div>
+
+<partial name="_UserManagementEntry" />
+
+@section Scripts
+{
+<script>
+
+       var table;
+
+       table = $('#usermanagement-list-table').DataTable({
+           "filter": true, // this is for disable filter (search box)
+           "paging": true,
+           "pageLength": 10,
+           "lengthChange": false,
+           "pagingType": "full_numbers",
+           "scrollX": false,
+           "autoWidth": true,
+           "initComplete": function (settings, json) {
+               $("#usermanagement-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+           },
+           buttons: [
+               {
+                   id:"btnAddNew",
+                   text: 'Add New',
+                   className: 'btn-primary',
+                   action: function ( e, dt, node, config ) {
+                       $("#usermanagement-list-table").modal('show');
+                   }
+               }
+           ],
+       });
+
+       loadUserList();
+
+       function loadUserList() {
+            debugger;
+           $('#usermanagement-list-table').DataTable().destroy();
+
+           table =  $('#usermanagement-list-table').DataTable({
+              
+               //"processing": true, // for show progress bar
+               "language": {
+                   processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+               },
+               "filter": true, // this is for disable filter (search box)
+               "paging": true,
+               "pageLength": 10,
+               "lengthChange": false,
+               "pagingType": "full_numbers",
+               "scrollX": false,
+               "autoWidth": true,
+               "bInfo" : false,
+               "ajax": {
+                   "url": "/UserManagement/GetUserManageList",
+                   //"data": {processId: processId},
+                   "dataSrc": function(d) {
+                       if (d.data.length === 0) {
+                           var settings = $('#usermanagement-list-table').DataTable().settings()[0];
+                           settings.oLanguage.sEmptyTable = d.message;
+                       }
+                       return d.data;
+                   },
+                   "type": "POST",
+                   "dataType": "json"
+               },
+               "columns": [
+                   
+                   { "data": "processName", "name": "ProcessId" },
+                   { "data": "empName", "name": "userId" },
+                   { "data": "isAdmin", "name": "IsAdmin", render: function ( data, type, row ) {
+                       var rowvalue = row.isAdmin;
+                           if (rowvalue == "1") {
+                                    return 'True';
+                               } else {
+                                   return 'False';
+                            }                        
+                    }
+                   },
+
+                   { "data": "entryBy", "name": "EntryBy" },
+                   { "data": "entryDate", "name": "EntryDate"},
+                   { "data": "updatedBy", "name": "UpdatedBy" },
+                   { "data": "updatedDate", "name": "UpdatedDate"},
+                   {
+                       data: null,
+                       render: function (data, type, row) {
+                           var dom = '<span class="cursor-pointer row-edit" ><i class="fas fa-edit primary fa-2x"></i><span>';
+                           return dom;
+                       }
+                   },
+               ],
+                columnDefs: [{
+                    render: function(data) {
+                           var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                            var date = new Date(data);
+                            var month = months[date.getMonth()];
+                            return date.getDate()+"-"+month + "-" + date.getFullYear()
+                              + ' ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                        },
+                       targets: [4,6]
+                   }
+                ],
+               dom: 'Bfrtip',
+               buttons: [
+                   {
+                        id:"btnAddNew",
+                        text: 'Add New',
+                        className: 'btn-primary',
+                        action: function ( e, dt, node, config ) {
+                           clearModal();
+                           $("#user-management-modal").modal('show');
+                       }
+                   }
+               ],
+               "initComplete": function(settings, json) {
+                   $("#usermanagement-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                   var btns = $('.btn-primary');
+                btns.addClass('btn-sm');
+                btns.removeClass('btn-secondary');
+               }
+           });
+       }
+
+       function clearModal() {
+           
+           $('#userId').val(null).trigger("change");
+           $('#hdnUserManagementId').val('');
+           $('#option').text('Management');
+           $('#processId').val(null).trigger("change");
+          $('#Ischk').prop('checked', false);
+       }
+
+    // Load Process name in drop down list
+       var pageSize = 5;
+
+       $("#processId").select2({
+           multiple: false,
+           delay: 250,
+           cache: true,
+           templateSelection: function (state) {
+               if (state.id) {
+                   return state.name ? state.name : state.text;
+               }
+           },
+           ajax: {
+               url: "/Process/ProcessFilter",
+               data: function (params) {
+                   var query = {
+                       id: (!params.term) ? "" :  params.term,
+                       processName: (!params.term) ?  "" : params.term,
+                       pageNumber: params.page || 1,
+                       pageSize: pageSize
+                   };
+                   return query;
+               },
+               dataType: 'json',
+               processResults: function (response, params) {
+
+                   selectData = {};
+                   params.page = params.page || 1;
+                   selectData = response.data.map(function (item) {
+                       return {
+                           id: item.id,
+                           text: item.processName
+                       };
+                   });
+                   //hideLoader();
+                   return {
+                       results: selectData,
+                       pagination: {
+                           more: (params.page * pageSize) < response.total
+                       }
+                   };
+               }
+           },
+           placeholder: "Select a State",
+           allowClear: true,
+           dropdownParent: $("#user-management-modal")
+
+       });
+
+      // Load user name in drop down list
+       var loadSize = 10;
+
+       $("#userId").select2({
+           multiple: false,
+           delay: 250,
+           cache: true,
+           templateSelection: function (state) {
+               if (state.id) {
+                   return state.name ? state.name : state.text;
+               }
+           },
+           ajax: {
+               url: "/UserManagement/LoadUser",
+               data: function (params) {  
+                   console.log(params);
+                   var query = {
+                       id: (!params.term) ?  "" : params.term,
+                       empName: (!params.term)  ?  "" : params.term,
+                       pageNumber: params.page || 1,
+                       loadSize: loadSize
+                   };
+                   console.log(query);
+                   return query;
+               },
+               dataType: 'json',
+               processResults: function (response, params) {
+
+                   selectData = {};
+                   params.page = params.page || 1;
+                   selectData = response.data.map(function (item) {
+                       return {
+                           id: item.empId,
+                           //id:item.id,
+                           text: item.empName
+                       };
+                   });
+                   //hideLoader();
+                   return {
+                       results: selectData,
+                       pagination: {
+                           more: (params.page * loadSize) < response.total
+                       }
+                   };
+               }
+           },
+           placeholder: "Select a State",
+           allowClear: true,
+           dropdownParent: $("#user-management-modal")
+
+       });
+
+       $(document).on('select2:open', () => {
+           document.querySelector('.select2-search__field').focus();
+       });
+
+       $('#user-management-modal').on('click', '#btn-usermanagement-save', function () {
+
+            var userName = $('#userId').val();
+            var processName = $('#processId').val();
+
+            var usermanagementId = $('#hdnUserManagementId').val();
+                  
+            if($("#Ischk").is(":checked")) {
+                 var isAdmin = '1';
+                  
+            }
+            else {
+                 var isAdmin = '0';
+            }          
+     
+           if( !(processId) || (processId == null)) {
+                toastr.error('Select a process!!!');
+                $.alert('Select a process!!!');
+                return;
+           }
+
+            if (!(userName) || userName == null) {
+                toastr.error('Sorry!!! User name is required!!!');
+                $.alert('Sorry!!! User name is required!!!');
+                return;
+            }
+
+
+            $.confirm({
+               title: 'Confirm!',
+               content: 'Are you sure to save?',
+               buttons: {
+                   confirm: function () {
+                       var users = {};
+                       users['UserId'] = userName;
+                       users['ProcessId'] = processName;
+                       users['IsAdmin']=isAdmin;
+                       users['Id'] = usermanagementId;
+
+                       $.ajax({
+                           url: "/UserManagement/SaveUserManagement",
+                           type: "POST",
+                           data: { userManagement: users },
+                           success: function (data) {
+
+                               if (data.status == true) {
+                                   toastr.success("message", data.message);
+                                  $("#user-management-modal").modal('hide');
+                                   clearModal();
+                                   loadUserList();
+                               }
+                               else {
+                                   toastr.error("Error", data.message);
+                                   $.alert(data.message);
+                               }
+                           },
+                       });
+
+                   },
+                   cancel: function () {
+
+                   }
+               }
+           });
+
+           });
+
+       $('#usermanagement-list-table').on('click', '.row-edit', function() {
+           debugger;
+            clearModal();
+           var rowData = table.row($(this).parents('tr')).data();
+           $('#categoryName').val(rowData['categoryName']);
+           $('#hdnUserManagementId').val(rowData['id']);
+
+            $('#processId').html('');
+            var optionState ='';
+            optionState ='<option value="' + rowData['processId'] +'">' + rowData['processName'] +'</option>';
+            $('#processId').append(optionState);
+
+            $('#userId').html('');
+            var optionState ='';
+            optionState ='<option value="' + rowData['userId'] +'">' + rowData['empName'] +'</option>';
+            $('#userId').append(optionState);
+
+             $('#Ischk').prop('checked', rowData['isAdmin'] =='1'?true:false);
+
+            $("#user-management-modal").modal('show');
+       } )
+
+       function CloseModalPopup() {       
+            $("#user-management-modal").modal('hide');
+            $("#btn_close").modal('hide');
+            clearModal();
+    }
+
+</script>
+}

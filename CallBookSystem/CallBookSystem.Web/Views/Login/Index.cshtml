@@ -1,0 +1,109 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using CallBookSystem.Web.ViewModels
+@model LoginViewModel
+
+@{
+    string menuTextColor = "rgba(255, 255, 255, 0.8)";
+
+}
+
+<section class="flexbox-container" style="margin-top:-15px">
+    <div class="col-12 d-flex align-items-center justify-content-center">
+        <div class="col-lg-12 col-md-6 col-10 box-shadow-2 p-0 mt-3">
+           
+        </div>
+    </div>
+</section>
+
+ <div class="card border-grey border-lighten-3 px-1 py-1" style="float:right;height: 565px; width: 350px;margin-right:-30px">
+                <div class="card-header border-0" style="padding-top:50px">
+                    <div class="text-center mb-1">
+                        <img src="~/image/logo.png" alt="branding logo" style="width:80px; height:87px;">
+                    </div>
+                    <div class="font-medium-2 font-weight-bold  text-center app-name">
+                        Lead Management System
+                    </div>
+                </div>
+                <div class="card-content" style="padding-top:50px">
+                    <div class="card-body" style="padding-bottom:12px">
+                        <div class="text-danger text-center pb-1">
+                            <span id="error-message">@ViewBag.ResponseMessage</span>
+                        </div>
+                        <form class="form-horizontal" method="post" novalidate id="form-login" asp-action="SignIn" asp-controller="Login">
+                            @Html.AntiForgeryToken()
+
+                            <fieldset class="form-group position-relative has-icon-left">
+                                <input type="text" class="form-control round" id="username" placeholder="Your Username" asp-for="@Model.UserId"
+                                       name="UserId" data-val-required="Please enter user name" value="@Model.UserId" autocomplete="on" style="padding-left: 2.25rem!important">
+                                <div class="form-control-position">
+                                    <i class="ft-user"></i>
+                                </div>
+                                @*<div class="text-danger">
+                                    <span asp-validation-for="@Model.UserId"></span>
+                                    </div>*@
+                            </fieldset>
+                            <fieldset class="form-group position-relative has-icon-left">
+                                <input type="password" class="form-control round" id="user-password" placeholder="Enter Password" asp-for="@Model.Password"
+                                       name="Password" data-val-required="Please enter password" autocomplete="on" style="padding-left: 2.25rem!important">
+                                <div class="form-control-position">
+                                    <i class="ft-lock"></i>
+                                </div>
+                                @*<div class="text-danger">
+                                    <span asp-validation-for="@Model.Password"></span>
+                                    </div>*@
+                            </fieldset>
+                            <div class="form-group row">
+                                <div class="col-md-6 col-12 text-center text-sm-left text-danger">
+                                </div>
+                                <div class="col-md-6 col-12 float-sm-left text-center text-sm-right">
+                                    <a href="javascript:void(0);" type="button" data-toggle="modal" data-target="#forgot-password-modal" class="card-link">Forgot password?</a>
+                                </div>
+                            </div>
+                            <div class="form-group text-center">
+                                <button type="submit" class="btn round btn-block btn-glow btn-bg-gradient-x-purple-blue col-12 mr-1 mb-1">Login</button>
+                            </div>
+
+                        </form>
+                    </div>
+                    <p class="card-subtitle line-on-side text-muted text-center font-small-3 mx-2 my-2 ">
+                        <span><img src="~/image/logo.png" style="width:20px;height:20px;" /></span>
+                    </p>
+                    <div class="text-center" style="-webkit-text-fill-color:chocolate">
+                        A product of BRAC BANK Ltd for internal use.
+                    </div>
+                </div>
+            </div>
+
+
+<footer class="border-top footer text-muted" style="background:#0072bc;padding: 0.8rem;position: fixed;bottom: 0;width: 100%;white-space: nowrap; margin-left: -30px; ">
+    <div class="" style="color:rgba(255, 255, 255, 0.8);font-size:11px">
+        Copyrights © BRAC Bank <script>document.write(new Date().getFullYear())</script>.&nbsp;&nbsp;All rights reserved.
+    </div>
+</footer>
+
+@*<partial name="/Views/Account/_ForgotPassword.cshtml" model="new ForgotPasswordViewModel()" />
+    <partial name="/Views/Account/_OTP.cshtml" model="new OtpViewModel()" />
+    <partial name="/Views/Account/_ChangePasswordFirstLogin.cshtml" model="new ChangePasswordViewModel()" />*@
+
+<script src="~/js/jsencrypt.js"></script>
+<script>
+    function setValue(key, value) {
+        localStorage.setItem(key, value);
+    }
+    function encrypt(msg) {
+        var crypt = new JSEncrypt();
+        crypt.setPrivateKey(document.getElementById("privkey").value);
+        var pubkey = document.getElementById("pubkey").value;
+        if (!pubkey) {
+            document.getElementById("pubkey").value = crypt.getPublicKey();
+        }
+        return crypt.encrypt(msg);
+    }
+    localStorage.clear();
+
+</script>
+
+

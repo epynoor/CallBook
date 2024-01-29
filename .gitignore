@@ -1,0 +1,36 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+
+/CallBookSystem/CallBookSystem.Infrastructure/bin
+/CallBookSystem/CallBookSystem.Infrastructure/obj
+/CallBookSystem/CallBookSystem.Web/bin
+/CallBookSystem/CallBookSystem.Web/obj
+/CallBookSystem/CallBookSystem.Application/bin
+/CallBookSystem/CallBookSystem.Application/obj
+/CallBookSystem/CallBookSystem.Domain/bin
+/CallBookSystem/CallBookSystem.Domain/obj
+/CallBookSystem/.vs/CallBookSystem/DesignTimeBuild/.dtbcache.v2
+/CallBookSystem/.vs/ProjectEvaluation
+/CallBookSystem/.vs
+/CallBookSystem/CallBookSystem.Web/Properties/PublishProfiles/FolderProfile.pubxml

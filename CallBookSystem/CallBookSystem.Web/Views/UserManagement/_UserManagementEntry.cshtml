@@ -1,0 +1,51 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+
+<div class="modal fade text-left" id="user-management-modal" role="dialog" aria-labelledby="reassign-modal-label" aria-hidden="true" style="z-index:1051;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h4 class="modal-title text-white" id="reassign-modal-label">User <span id="option">Management</span></h4>
+                <button type="button" class="close text-white" onclick="CloseModalPopup();" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body modal-fixed">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="documentNo">Process Name<span class="text-danger ml-005">*</span></label>
+                            <select id="processId" class="form-control select2" placeholder="Select a Process" style="width: 100%;" />
+                            <input type="hidden" id="hdnUserManagementId" />
+                            <input type="hidden" id="hdnEmpId" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="documentNo">User Name<span class="text-danger ml-005">*</span></label>
+                            <select id="userId" class="form-control select2" placeholder="Select a User" style="width: 100%;">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <input id="Ischk" type="checkbox" value="false" name="Live" style="zoom:1.5;" />&nbsp;<b style="font-size: 11px;">Is Admin</b><br/><br/>
+                @*<input type="hidden" value="false" name="Live" />*@
+
+                <div class="row">
+                    <div class="col-md-12 float-right">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-info" id="btn-usermanagement-save">Save</button>
+                            <button type="button" id="btn_close" class="btn grey btn-secondary" onclick="CloseModalPopup();" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

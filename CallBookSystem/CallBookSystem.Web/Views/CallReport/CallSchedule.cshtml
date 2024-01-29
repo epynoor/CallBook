@@ -1,0 +1,420 @@
+﻿
+@{
+    ViewData["Title"] = "Call Schedule";
+    Layout = "~/Views/Shared/Template/_Layout.cshtml";
+}
+
+<br />
+<div class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                 <h3 class="card-title">Lead Manager</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>            
+            <div class="card-body">  
+                <div class="card-content">
+                    <ul class="nav nav-tabs" id="custom-content-above-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="initiated-call-plan-tab" data-bs-toggle="tab" href="#initiated-call-plan" role="tab" aria-controls="initiated-call-plan" aria-selected="true" >My Lead</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="approved-call-plan-tab" data-bs-toggle="tab" href="#approved-call-plan" role="tab" aria-controls="approved-call-plan" aria-selected="false">Team Engagement</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="custom-content-above-tabContent">
+                        <div class="tab-pane fade show active" id="initiated-call-plan" role="tabpanel" aria-labelledby="initiated-call-plan-tab">
+                            <br />
+                            <div id="product-summary" class="media-list position-relative">                               
+                                <partial name="_CallScheduleTab" />
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="approved-call-plan" role="tabpanel" aria-labelledby="approved-call-plan-tab">
+                            <br />
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label-sm text-right">Team <span class="text-danger ml-005"></span></label>
+                                <div class="col-sm-4 ">
+                                    <select id="userId" class="form-control select2" placeholder="Select a User" style="width: 100%;">
+                                    </select>
+                                    <input type="hidden" id="UtempId" />
+                                </div>
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-primary mb-3" id="btn-Team-Search">Search</button>
+                                    
+                                </div>
+                            </div>
+                            <div id="product-summary" class="media-list position-relative">
+                                <partial name="_SubordinateTab" />
+                                <input type="hidden" id="hdnSupervisorNo" name="supervisorId" value="@ViewBag.Supervisorid" />
+                            </div>
+                        </div>
+                    </div>                   
+                </div>              
+            </div>
+
+        </div>    
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        
+       
+        var table;
+        loadAcceptedCallPlanList();
+        loadSubordinentCallScheduleList();
+
+        function loadAcceptedCallPlanList() {
+
+            $('#callplan-list-table').DataTable().destroy();
+
+            table =  $('#callplan-list-table').DataTable({
+            //"processing": true, // for show progress bar
+            "language": {
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+            },
+            "filter": true, // this is for disable filter (search box)
+            "paging": true,
+            "pageLength": 10,
+            "lengthChange": false,
+            "pagingType": "full_numbers",
+            "scrollX": false,
+            "autoWidth": true,
+            "ajax": {
+                "url": "/CallReport/GetAcceptedCallPlanList",
+                "dataSrc": function(d) {
+                    if (d.data.length === 0) {
+                        var settings = $('#callplan-list-table').DataTable().settings()[0];
+                        settings.oLanguage.sEmptyTable = d.message;
+                    }
+                    return d.data;
+                },
+                "type": "POST",
+                "dataType": "json"
+            },
+            "columns": [
+                { "data": "tentativeDate", "name": "TentativeDate" },                
+                { "data": "callPlanId", "name": "CallPlanId" },
+                { "data": "categoryName", "name": "CategoryName" },
+                { "data": "callTypeName", "name": "CallTypeName" },
+               // { "data": "cif", "name": "CIF" },
+                { "data": "shortName", "name": "Name" },
+                { "data": "shortSubject", "name": "Subject" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+
+                        callPlanId = row.id;
+                        url = '@Url.Action("Index","CallReportEntry")?callPlanId='+callPlanId+'';
+
+                        var dom = '<a class="cursor-pointer row-create" href="'+url+'" ><i data-toggle="tooltip" data-tooltip="Add Call Report" data-tooltip-position="right" title="Add Call Report" class="fas fa-tasks primary fa-1x"></i></a>'
+                        dom = dom + '&nbsp&nbsp|&nbsp&nbsp<span class="cursor-pointer row-dismiss" ><i data-toggle="tooltip" data-tooltip="Dismiss" data-tooltip-position="right" title="Dismiss" class="fas fa-trash-alt primary fa-1x"></i></span>';
+                        return dom;
+                    },
+                    
+                    ordering: false
+                },
+            ],            
+            dom: 'Bfrtip',
+            
+            columnDefs: [{
+                 render: function(data) {
+                        var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                         var date = new Date(data);
+                         var month = months[date.getMonth()];
+                         return date.getDate()+"-"+month + "-" + date.getFullYear();
+                     },
+                    targets: [0]
+                }
+             ],
+            "initComplete": function(settings, json) {
+                $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                $('[data-toggle="tooltip"]').tooltip();
+        
+            }
+        });
+        }
+
+         function loadSubordinentCallScheduleList() {
+             
+
+            $('#subordinate-list-table').DataTable().destroy();
+
+            table =  $('#subordinate-list-table').DataTable({
+            //"processing": true, // for show progress bar
+            "language": {
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+            },
+            "filter": false, // this is for disable filter (search box)
+            "paging": true,
+            "pageLength": 10,
+            "lengthChange": false,
+            "pagingType": "full_numbers",
+            "scrollX": false,
+            "autoWidth": true,
+            "ajax": {
+                "url": "/CallReport/GetSubordinateScheduleList",
+                "dataSrc": function(d) {
+                    if (d.data.length === 0) {
+                        var settings = $('#subordinate-list-table').DataTable().settings()[0];
+                        settings.oLanguage.sEmptyTable = d.message;
+                    }
+                    return d.data;
+                },             
+                "type": "GET",
+                "dataType": "json"
+            },
+            "columns": [
+                { "data": "empName", "name": "EmpName" },
+                { "data": "empPin", "name": "EmpPin" },
+                { "data": "tentativeDate", "name": "TentativeDate" },                
+                { "data": "callPlanId", "name": "CallPlanId" },
+                { "data": "categoryName", "name": "CategoryName" },
+                { "data": "callTypeName", "name": "CallTypeName" },
+               // { "data": "cif", "name": "CIF" },
+                { "data": "shortName", "name": "Name" },
+                { "data": "shortSubject", "name": "Subject" },
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+
+                //        callPlanId = row.id;
+                //        url = '@Url.Action("Index","CallReportEntry")?callPlanId='+callPlanId+'';
+
+                //        var dom = '<a class="cursor-pointer row-create" href="'+url+'" ><i data-toggle="tooltip" data-tooltip="Add Call Report" data-tooltip-position="right" title="Add Call Report" class="fas fa-tasks primary fa-1x"></i></a>'
+                //        dom = dom + '&nbsp&nbsp|&nbsp&nbsp<span class="cursor-pointer row-dismiss" ><i data-toggle="tooltip" data-tooltip="Dismiss" data-tooltip-position="right" title="Dismiss" class="fas fa-trash-alt primary fa-1x"></i></span>';
+                //        return dom;
+                //    },
+                    
+                //    ordering: false
+                //},
+            ],            
+            dom: 'Bfrtip',
+            
+            columnDefs: [{
+                 render: function(data) {
+                        var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                         var date = new Date(data);
+                         var month = months[date.getMonth()];
+                         return date.getDate()+"-"+month + "-" + date.getFullYear();
+                     },
+                    targets: [2]
+                }
+             ],
+            "initComplete": function(settings, json) {
+                $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                $('[data-toggle="tooltip"]').tooltip();
+        
+            }
+        });
+        }
+
+        $('#callplan-list-table').on('click', '.row-dismiss', function() {
+
+            var rowData = table.row($(this).parents('tr')).data();
+            
+            $.confirm({
+                title: 'Confirm!',
+                
+                content: '<p>Are you sure to dismiss the scheduled call?</p>' +
+                    '<div class="form-group">' +
+                    '<label>Enter Remarks</label>' +
+                    '<input type="text" placeholder="Remarks" class="remark form-control" required />' +
+                    '</div>' ,
+                buttons: {
+                    confirm: function () {
+
+                        var remarks = this.$content.find('.remark').val();
+                        if(!remarks){
+                            $.alert('provide Dismiss remarks');
+                            return false;
+                        }
+                        
+                        var request = {
+                            id: rowData["id"],
+                            remarks: remarks
+                        }
+
+                        console.log(request);
+
+                        $.ajax({
+                            url: "/CallReport/DismissCallPlan",
+                            type: "POST",
+                            data: request ,
+                            success: function (data) {
+
+                                if (data.status == true) {
+                                    toastr.success("message", data.message);
+                                    loadAcceptedCallPlanList();
+                                }
+                                else {
+                                    toastr.error("Error", data.message);
+                                    $.alert(data.message);
+                                }
+                            }
+                        });
+
+                        
+
+                    },
+                    cancel: function () {
+                    
+                    }
+                }
+            });
+            
+        } )
+
+ // Load user name in drop down list
+       var loadSize = 10;
+
+       $("#userId").select2({
+           multiple: false,
+           delay: 250,
+           cache: true,
+           templateSelection: function (state) {
+               if (state.id) {
+                   return state.name ? state.name : state.text;
+               }
+           },
+           ajax: {
+               url: "/UserManagement/LoadUserbySupervisor",
+               data: function (params) {  
+                   console.log(params);
+                   var query = {
+                       id: (!params.term) ?  "" : params.term,
+                       empName: (!params.term)  ?  "" : params.term,
+                       pageNumber: params.page || 1,
+                       loadSize: loadSize
+                   };
+                   console.log(query);
+                   return query;
+               },
+               dataType: 'json',
+               processResults: function (response, params) {
+
+                   selectData = {};
+                   params.page = params.page || 1;
+                   selectData = response.data.map(function (item) {
+                       return {
+                           id: item.empId,
+                           //id:item.id,
+                           text: item.empName
+                       };
+                   });
+                   //hideLoader();
+                   return {
+                       results: selectData,
+                       pagination: {
+                           more: (params.page * loadSize) < response.total
+                       }
+                   };
+               }
+           },
+           placeholder: "Select a State",
+           allowClear: true
+
+       });
+
+      $(document).on('click', '#btn-Team-Search', function () {
+          let seachString = $("#userId").val();
+          loadSubordinentByTeamList(seachString);
+           $('#userId').val(null).trigger("change");
+           
+        });
+
+     function loadSubordinentByTeamList(seachString) {
+             
+
+            $('#subordinate-list-table').DataTable().destroy();
+
+            table =  $('#subordinate-list-table').DataTable({
+            //"processing": true, // for show progress bar
+            "language": {
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+            },
+            "filter": false, // this is for disable filter (search box)
+            "paging": true,
+            "pageLength": 10,
+            "lengthChange": false,
+            "pagingType": "full_numbers",
+            "scrollX": false,
+            "autoWidth": true,
+            "ajax": {
+                "url": "/CallReport/GetSubordinateByTeamId",
+                "dataSrc": function(d) {
+                    if (d.data.length === 0) {
+                        var settings = $('#subordinate-list-table').DataTable().settings()[0];
+                        settings.oLanguage.sEmptyTable = d.message;
+                    }
+                    return d.data;
+                },
+                "data": { teamId: seachString},
+                "type": "GET",
+                "dataType": "json"
+            },
+            "columns": [
+                { "data": "empName", "name": "EmpName" },
+                { "data": "empPin", "name": "EmpPin" },
+                { "data": "tentativeDate", "name": "TentativeDate" },                
+                { "data": "callPlanId", "name": "CallPlanId" },
+                { "data": "categoryName", "name": "CategoryName" },
+                { "data": "callTypeName", "name": "CallTypeName" },
+               // { "data": "cif", "name": "CIF" },
+                { "data": "shortName", "name": "Name" },
+                { "data": "shortSubject", "name": "Subject" },
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+
+                //        callPlanId = row.id;
+                //        url = '@Url.Action("Index","CallReportEntry")?callPlanId='+callPlanId+'';
+
+                //        var dom = '<a class="cursor-pointer row-create" href="'+url+'" ><i data-toggle="tooltip" data-tooltip="Add Call Report" data-tooltip-position="right" title="Add Call Report" class="fas fa-tasks primary fa-1x"></i></a>'
+                //        dom = dom + '&nbsp&nbsp|&nbsp&nbsp<span class="cursor-pointer row-dismiss" ><i data-toggle="tooltip" data-tooltip="Dismiss" data-tooltip-position="right" title="Dismiss" class="fas fa-trash-alt primary fa-1x"></i></span>';
+                //        return dom;
+                //    },
+                    
+                //    ordering: false
+                //},
+            ],            
+            dom: 'Bfrtip',
+            
+            columnDefs: [{
+                 render: function(data) {
+                        var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                         var date = new Date(data);
+                         var month = months[date.getMonth()];
+                         return date.getDate()+"-"+month + "-" + date.getFullYear();
+                     },
+                    targets: [2]
+                }
+             ],
+            "initComplete": function(settings, json) {
+                $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                $('[data-toggle="tooltip"]').tooltip();
+        
+            }
+        });
+        }
+
+       var SupervisorID= $('#hdnSupervisorNo').val();
+       //var SupervisorID = document.getElementById('hdnSupervisorNo').value;
+        if(SupervisorID=='')
+        {
+           $('#approved-call-plan-tab').hide();
+        }else{
+             $('#approved-call-plan-tab').show();
+              loadAcceptedCallPlanList();
+              loadSubordinentCallScheduleList();
+        }
+       
+
+    </script>
+}

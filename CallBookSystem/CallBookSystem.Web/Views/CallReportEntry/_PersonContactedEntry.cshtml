@@ -1,0 +1,50 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<div class="modal fade text-left" id="person-entry-Model" role="dialog" aria-labelledby="reassign-modal-label" aria-hidden="true" style="z-index:1051;">
+    <div class="modal-dialog modal-xs" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h6 class="modal-title text-white" id="reassign-modal-label">Person Contacted <span id="option">Entry</span></h6>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body modal-fixed">
+                <div class="form-group row" style="margin-bottom:0.09rem">
+                    <label class="col-sm-4 col-form-label-sm text-right">Person Name :</label>
+                    <div class="col-md-8">                         
+                       <input type="text" id="txtPersonName" class="form-control form-control-sm" placeholder="Enter Name" autocomplete="off" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="form-group row" style="margin-bottom:0.09rem">
+                    <label class="col-sm-4 col-form-label-sm text-right">Relation :</label>
+                    <div class="col-md-8">                         
+                       <input type="text" id="txtRelation" class="form-control form-control-sm" placeholder="Enter Relation" autocomplete="off" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="form-group row" style="margin-bottom:0.09rem">
+                    <label class="col-sm-4 col-form-label-sm text-right">Contact Number :</label>
+                    <div class="col-md-8">                         
+                       <input type="text" id="txtContactNumber" class="form-control form-control-sm" placeholder="Enter Contact Number" autocomplete="off" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="form-group row" style="margin-bottom:0.09rem">
+                    <label class="col-sm-4 col-form-label-sm text-right">Address :</label>
+                    <div class="col-sm-8">                         
+                       <textarea rows="3" id="txtAddress" class="form-control form-control-sm" placeholder="Enter Address" autocomplete="off" style="width: 100%;"></textarea>
+                    </div>
+                </div>
+                 <div class="row">
+                    <div class="col-md-12 float-right">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-info" id="btn-person-add">Add</button>
+                            <button type="button" class="btn grey btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

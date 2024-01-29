@@ -1,0 +1,453 @@
+﻿@{
+    ViewData["Title"] = "Call Report";
+    Layout = "~/Views/Shared/Template/_Layout.cshtml";
+}
+
+
+<br />
+<div class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">Lead Outlook</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-content">
+                    <ul class="nav nav-tabs" id="custom-content-above-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="initiated-call-plan-tab" data-bs-toggle="tab" href="#initiated-call-plan" role="tab" aria-controls="initiated-call-plan" aria-selected="true">My Lead</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="approved-call-plan-tab" data-bs-toggle="tab" href="#approved-call-plan" role="tab" aria-controls="approved-call-plan" aria-selected="false">Team Engagement</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link" id="team-dashboard-tab" data-bs-toggle="tab" href="#team-dashboard" role="tab" aria-controls="team-dashboard" aria-selected="false">Team Dashboard</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="custom-content-above-tabContent">
+                        <div class="tab-pane fade show active" id="initiated-call-plan" role="tabpanel" aria-labelledby="initiated-call-plan-tab">
+                            <br />
+                            <div id="product-summary" class="media-list position-relative">
+                                <partial name="_LeadScheduleTab" />
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="approved-call-plan" role="tabpanel" aria-labelledby="approved-call-plan-tab">
+                            <br />
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label-sm text-right">Team <span class="text-danger ml-005"></span></label>
+                                <div class="col-sm-4 ">
+                                    <select id="userId" class="form-control select2" placeholder="Select a User" style="width: 100%;">
+                                    </select>
+                                    <input type="hidden" id="UtempId" />
+                                </div>
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-primary mb-3" id="btn-Team-Search">Search</button>
+                                    
+                                </div>
+                            </div>
+
+                            <div id="product-summary" class="media-list position-relative">
+                                <partial name="_SubordinateLeadTab" />
+                                <input type="hidden" id="hdnSupervisor" name="supervisor" value="@ViewBag.Supervisor" />
+                            </div>
+                        </div>
+
+                         <div class="tab-pane fade" id="team-dashboard" role="tabpanel" aria-labelledby="team-dashboard-tab">
+                            <br />
+                             
+                            <div id="product-summary" class="media-list position-relative">
+                                <partial name="_TeamDashboard" />
+                            </div>
+                            <input type="hidden" id="hdnEmpPin" name="hdnEmpPin" value="@ViewBag.EmpPin" />
+                            <input type="hidden" id="hdnPlantCount" name="hdnPlantCount" value="@ViewBag.PlantCount" />
+                            <input type="hidden" id="hdnCallCount" name="hdnCallCount" value="@ViewBag.CallCount" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<partial name="_MyLeadDetails" />
+
+@section Scripts
+{
+<script type="text/javascript" src="~/lib/chart/chart.min.js"></script>
+<script src="~/js/dashboard3.js"></script>
+<script src="~/js/bootstrap-datepicker.js"></script>
+<script>
+          loadLeadReportList();
+          loadSubordnateLeadReportList();
+          var table1;
+
+          function loadLeadReportList() {
+              //debugger;
+              $('#call-lead-list-table').DataTable().destroy();
+
+              table1 =  $('#call-lead-list-table').DataTable({
+              //"processing": true, // for show progress bar
+              "language": {
+                  processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+              },
+              "filter": true, // this is for disable filter (search box)
+              "paging": true,
+              "pageLength": 10,
+              "lengthChange": false,
+              "serverSide": true,
+              "pagingType": "full_numbers",
+              "scrollX": false,
+              "autoWidth": true,
+              "ajax": {
+                  "url": "/CallReport/GetCallReportList",
+                  "dataSrc": function(d) {
+                      if (d.data.length === 0) {
+                          var settings = $('#call-lead-list-table').DataTable().settings()[0];
+                          settings.oLanguage.sEmptyTable = d.message;
+                      }
+                      return d.data;
+                  },
+                  "type": "POST",
+                  "dataType": "json"
+              },
+              "columns": [
+                  { "data": "lastCallDate", "name": "LastCallDate" },
+                  { "data": "name", "name": "Name" },
+                  { "data": "shortSubject", "name": "Subject" },
+                  { "data": "strNextFollowUpDate", "name": "NextFollowUpDate" },
+                  { "data": "status", "name": "Status" },
+                  {
+                      data: null,
+                      render: function (data, type, row) {
+
+                          callid = row.callId;
+                          url = '@Url.Action("Index","CallReportEntry")?callId='+callid+'';
+
+                          var dom = "<a class='cursor-pointer row-create' href='"+url+"' ><i data-toggle='tooltip' data-tooltip='Add Call Report Activity' data-tooltip-position='right' title='Add Call Report Activity' class='fas fa-tasks primary fa-1x'></i></a>"
+                          dom=dom + "&nbsp&nbsp|&nbsp&nbsp<span class='cursor-pointer row-detail' ><i data-toggle='tooltip' data-tooltip='Details View' data-tooltip-position='right' title='Details View' class='fas fa-eye fa-1.5x'></i></span>"
+                          dom = dom + "&nbsp&nbsp|&nbsp&nbsp<span class='cursor-pointer row-dismiss' ><i data-toggle='tooltip' data-tooltip='Dismiss' data-tooltip-position='right' title='Dismiss' class='fas fa-trash-alt primary fa-1x'></i></span>";
+                          return dom;
+                      },
+                      ordering: false
+                  },
+              ],
+              dom: 'Bfrtip',
+
+              columnDefs: [{
+                   render: function(data) {
+                          var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                           var date = new Date(data);
+                           var month = months[date.getMonth()];
+                           return date.getDate()+"-"+month + "-" + date.getFullYear();
+                       },
+                      targets: [0]
+                  }
+               ],
+              "initComplete": function(settings, json) {
+                  $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                  $('[data-toggle="tooltip"]').tooltip();
+
+              }
+          });
+          }
+
+           function loadSubordnateLeadReportList() {
+
+              $('#lead-subordinate-list-table').DataTable().destroy();
+
+              table =  $('#lead-subordinate-list-table').DataTable({
+              //"processing": true, // for show progress bar
+              "language": {
+                  processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+              },
+              "filter": false, // this is for disable filter (search box)
+              "paging": true,
+              "pageLength": 10,
+              "lengthChange": false,
+              "serverSide": true,
+              "pagingType": "full_numbers",
+              "scrollX": false,
+              "autoWidth": true,
+              "ajax": {
+                  "url": "/CallReport/GetSubordiateCallReportList",
+                  "dataSrc": function(d) {
+                      if (d.data.length === 0) {
+                          var settings = $('#lead-subordinate-list-table').DataTable().settings()[0];
+                          settings.oLanguage.sEmptyTable = d.message;
+                      }
+                      return d.data;
+                  },
+                  "type": "POST",
+                  "dataType": "json"
+              },
+              "columns": [
+                  { "data": "empName", "name": "EmpName" },
+                  { "data": "empPin", "name": "EmpPin" },
+                  { "data": "lastCallDate", "name": "LastCallDate" },
+                  { "data": "name", "name": "Name" },
+                  { "data": "shortSubject", "name": "Subject" },
+                  { "data": "strNextFollowUpDate", "name": "NextFollowUpDate" },
+                  { "data": "status", "name": "Status" },
+                  //{
+                  //    data: null,
+                  //    render: function (data, type, row) {
+
+                  //        callid = row.callId;
+                  //        url = '@Url.Action("Index","CallReportEntry")?callId='+callid+'';
+
+                  //        var dom = "<a class='cursor-pointer row-create' href='"+url+"' ><i data-toggle='tooltip' data-tooltip='Add Call Report Activity' data-tooltip-position='right' title='Add Call Report Activity' class='fas fa-tasks primary fa-1x'></i></a>"
+                  //        dom = dom + "&nbsp&nbsp|&nbsp&nbsp<span class='cursor-pointer row-dismiss' ><i data-toggle='tooltip' data-tooltip='Dismiss' data-tooltip-position='right' title='Dismiss' class='fas fa-trash-alt primary fa-1x'></i></span>";
+                  //        return dom;
+                  //    },
+                  //    ordering: false
+                  //},
+              ],
+              dom: 'Bfrtip',
+
+              columnDefs: [{
+                   render: function(data) {
+                          var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                           var date = new Date(data);
+                           var month = months[date.getMonth()];
+                           return date.getDate()+"-"+month + "-" + date.getFullYear();
+                       },
+                      targets: [2]
+                  }
+               ],
+              "initComplete": function(settings, json) {
+                  $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                  $('[data-toggle="tooltip"]').tooltip();
+
+              }
+          });
+          }
+
+     $('#call-lead-list-table').on('click', '.row-detail', function() {
+
+     $("#Lead-details-modal").modal('show');
+     var rowData = table1.row($(this).parents('tr')).data();
+     var table3;
+
+     $('#callActivity-details-table').DataTable().destroy();
+      table3 =  $('#callActivity-details-table').DataTable({
+              "language": {
+                  processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+              },
+              "filter": true, // this is for disable filter (search box)
+              "paging": true,
+              "pageLength": 6,
+              "lengthChange": false,
+              //"serverSide": true,
+              "pagingType": "full_numbers",
+              "scrollX": false,
+              "autoWidth": true,
+              "ajax": {
+                  "url": "/CallReport/GetCallActivityDetails",
+                  "type": "POST",
+                  "data": { callId : rowData['callId'] },
+                  "dataType": "json"
+              },
+              "columns": [
+
+                  { "data": "name", "name": "Name" },
+                  //{ "data": "cif", "name": "CIF" },
+                  { "data": "contactPerson", "name": "ContactPerson" },
+                  { "data": "nextFollowUpDate", "name": "NextFollowUpDate" },
+                  { "data": "followUpNote", "name": "FollowUpNote" },
+                  { "data": "actionPlan", "name": "ActionPlan" },
+                  { "data": "summary", "name": "Summary" },
+                  { "data": "fileName", "name": "FileName" }
+              ],
+              dom: 'Bfrtip',
+
+              columnDefs: [{
+                   render: function(data) {
+                          var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                           var date = new Date(data);
+                           var month = months[date.getMonth()];
+                           return date.getDate()+"-"+month + "-" + date.getFullYear();
+                       },
+                      targets: [3]
+                  }
+               ],
+              "initComplete": function(settings, json) {
+                  $("#callActivity-details-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                  $('[data-toggle="tooltip"]').tooltip();
+
+              }
+          });
+
+     })
+
+      // Load user name in drop down list
+       var loadSize = 10;
+
+       $("#userId").select2({
+           multiple: false,
+           delay: 250,
+           cache: true,
+           templateSelection: function (state) {
+               if (state.id) {
+                   return state.name ? state.name : state.text;
+               }
+           },
+           ajax: {
+               url: "/UserManagement/LoadUserbySupervisor",
+               data: function (params) {  
+                   console.log(params);
+                   var query = {
+                       id: (!params.term) ?  "" : params.term,
+                       empName: (!params.term)  ?  "" : params.term,
+                       pageNumber: params.page || 1,
+                       loadSize: loadSize
+                   };
+                   console.log(query);
+                   return query;
+               },
+               dataType: 'json',
+               processResults: function (response, params) {
+
+                   selectData = {};
+                   params.page = params.page || 1;
+                   selectData = response.data.map(function (item) {
+                       return {
+                           id: item.empId,
+                           //id:item.id,
+                           text: item.empName
+                       };
+                   });
+                   //hideLoader();
+                   return {
+                       results: selectData,
+                       pagination: {
+                           more: (params.page * loadSize) < response.total
+                       }
+                   };
+               }
+           },
+           placeholder: "Select a State",
+           allowClear: true
+
+       });
+
+      $(document).on('click', '#btn-Team-Search', function () {
+          let seachString = $("#userId").val();
+          loadSubordnateLeadReportByTeam(seachString);
+           $('#userId').val(null).trigger("change");
+           
+        });
+
+    
+        function loadSubordnateLeadReportByTeam(seachString) {
+
+              $('#lead-subordinate-list-table').DataTable().destroy();
+
+              table =  $('#lead-subordinate-list-table').DataTable({
+              //"processing": true, // for show progress bar
+              "language": {
+                  processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+              },
+              "filter": false, // this is for disable filter (search box)
+              "paging": true,
+              "pageLength": 10,
+              "lengthChange": false,
+              "serverSide": true,
+              "pagingType": "full_numbers",
+              "scrollX": false,
+              "autoWidth": true,
+              "ajax": {
+                  "url": "/CallReport/GetSubordiateReportByTeam",
+                  "dataSrc": function(d) {
+                      if (d.data.length === 0) {
+                          var settings = $('#lead-subordinate-list-table').DataTable().settings()[0];
+                          settings.oLanguage.sEmptyTable = d.message;
+                      }
+                      return d.data;
+                  },
+                  "data": { teamId: seachString},
+                  "type": "POST",
+                  "dataType": "json"
+              },
+              "columns": [
+                  { "data": "empName", "name": "EmpName" },
+                  { "data": "empPin", "name": "EmpPin" },
+                  { "data": "lastCallDate", "name": "LastCallDate" },
+                  { "data": "name", "name": "Name" },
+                  { "data": "shortSubject", "name": "Subject" },
+                  { "data": "strNextFollowUpDate", "name": "NextFollowUpDate" },
+                  { "data": "status", "name": "Status" },
+                  //{
+                  //    data: null,
+                  //    render: function (data, type, row) {
+
+                  //        callid = row.callId;
+                  //        url = '@Url.Action("Index","CallReportEntry")?callId='+callid+'';
+
+                  //        var dom = "<a class='cursor-pointer row-create' href='"+url+"' ><i data-toggle='tooltip' data-tooltip='Add Call Report Activity' data-tooltip-position='right' title='Add Call Report Activity' class='fas fa-tasks primary fa-1x'></i></a>"
+                  //        dom = dom + "&nbsp&nbsp|&nbsp&nbsp<span class='cursor-pointer row-dismiss' ><i data-toggle='tooltip' data-tooltip='Dismiss' data-tooltip-position='right' title='Dismiss' class='fas fa-trash-alt primary fa-1x'></i></span>";
+                  //        return dom;
+                  //    },
+                  //    ordering: false
+                  //},
+              ],
+              dom: 'Bfrtip',
+
+              columnDefs: [{
+                   render: function(data) {
+                          var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                           var date = new Date(data);
+                           var month = months[date.getMonth()];
+                           return date.getDate()+"-"+month + "-" + date.getFullYear();
+                       },
+                      targets: [2]
+                  }
+               ],
+              "initComplete": function(settings, json) {
+                  $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                  $('[data-toggle="tooltip"]').tooltip();
+
+              }
+          });
+          }
+
+       $(document).on('select2:open', () => {
+           document.querySelector('.select2-search__field').focus();
+       });
+
+  function loadChartPlanList(seachString) {
+
+
+  }
+
+          var SupervisorID= $('#hdnSupervisor').val();
+          if(SupervisorID=='')
+          {
+             $('#approved-call-plan-tab').hide();
+          }else{
+               $('#approved-call-plan-tab').show();
+                loadLeadReportList();
+                loadSubordnateLeadReportList();
+          }
+
+    function CloseModalPopup() {
+         $("#Lead-details-modal").modal('hide');
+      }
+
+
+
+
+
+
+
+
+</script>
+}

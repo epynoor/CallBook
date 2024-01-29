@@ -1,0 +1,47 @@
+﻿@using System.Security.Claims
+
+
+<nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow navbar-static-top navbar-light navbar-brand-center">
+    <div class="navbar-header">
+        <ul class="nav navbar-nav flex-row">
+            <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
+            <li class="nav-item d-md-none"><a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile"><i class="la la-ellipsis-v"></i></a></li>
+        </ul>
+    </div>
+    <div class="navbar-wrapper">
+        <div class="navbar-container content">
+            <div class="collapse navbar-collapse" id="navbar-mobile">
+                <ul class="nav navbar-nav mr-auto float-left">
+                    <li class="nav-item d-none d-md-none"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0);"><i class="ft-menu"></i></a></li>
+                    <li class="nav-item d-none d-md-block"><a class="nav-link nav-link-expand" href="javascript:void(0);"><i class="ficon ft-maximize"></i></a></li>
+                    <li class="nav-item d-none d-md-block" style="line-height:1.6rem;">
+                        <a class="nav-link font-medium-2 font-weight-bold text-center app-name" asp-controller="Home" asp-action="Index">Call Book System</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav float-right" >
+                    <li class="dropdown dropdown-user nav-item" id="userInfoli" >
+                        
+                        <a class="dropdown-toggle nav-link dropdown-user-link d-flex" href="javascript:void(0);" data-toggle="dropdown" >
+                            <span class="text-bold-700 ml-1 cursor-pointer user-name" style="margin-top:14px; margin-right: 9px;">@User.Claims.Where(c => c.Type == ClaimTypes.GivenName).First().Value</span>
+                            <span id="userInfo">
+                                <i id="user-icon" class="fas fa-user-circle fa-3x" style="color: #0154a0;"></i>
+                                <img src="" id="img-profile" class="user-image d-none" alt="avatar">
+                            </span>
+                        </a>
+                        
+                        
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <div class="arrow_box_right">
+                                <a class="dropdown-item" data-toggle="modal" data-target="#changepassword-modal"><i class="fas fa-user-lock"></i>Change Password</a>
+                                <form asp-controller="Login" asp-action="Logout" method="post" novalidate id="form-logout">
+                                    <div class="dropdown-divider"></div><button type="submit" class="dropdown-item" href="javascript:void(0);"><i class="ft-power"></i> Logout</button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+@*<partial name="/Views/Account/_ChangePassword.cshtml" />*@

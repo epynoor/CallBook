@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "jquery@3.6.1",
+      "destination": "wwwroot/lib/jquery/"
+    },
+    {
+      "library": "bootstrap@5.2.1",
+      "destination": "wwwroot/lib/bootstrap/"
+    },
+    {
+      "library": "jquery-validate@1.19.5",
+      "destination": "wwwroot/lib/jquery-validation/"
+    },
+    {
+      "library": "jquery-validation-unobtrusive@4.0.0",
+      "destination": "wwwroot/lib/jquery-validation-unobtrusive/"
+    },
+    {
+      "library": "select2@4.0.13",
+      "destination": "wwwroot/lib/select2/"
+    },
+    {
+      "library": "toastr.js@2.1.4",
+      "destination": "wwwroot/lib/toastr/"
+    },
+    {
+      "library": "datatables@1.10.21",
+      "destination": "wwwroot/lib/datatables/"
+    },    
+    {
+      "library": "font-awesome@6.2.0",
+      "destination": "wwwroot/lib/font-awesome/"
+    },
+    {
+      "library": "datatables-buttons@2.2.3",
+      "destination": "wwwroot/lib/datatables-button/"
+    },
+    {
+      "library": "jquery-confirm@3.3.4",
+      "destination": "wwwroot/lib/jquery-confirm/"
+    },
+    {
+      "library": "moment.js@2.29.4",
+      "destination": "wwwroot/lib/momentjs/"
+    },
+    {
+      "library": "datatables-responsive@2.3.0",
+      "destination": "wwwroot/lib/datatables-responsive/"
+    },
+    {
+      "library": "select2-bootstrap-5-theme@1.3.0",
+      "destination": "wwwroot/lib/select2-bootstrap-5-theme/"
+    },
+    {
+      "library": "dropzone@5.9.3",
+      "destination": "wwwroot/lib/dropzone/"
+
+    },
+    {
+      "library": "jqueryui@1.13.2",
+      "destination": "wwwroot/lib/jquery-ui/"
+    },
+    {
+      "library": "Chart.js@3.9.1",
+      "destination": "wwwroot/lib/chart/"
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+﻿
+@{
+    ViewData["Title"] = "Process";
+    Layout = "~/Views/Shared/Template/_Layout.cshtml";
+}
+<br />
+<div class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                 <h3 class="card-title">Process <small>List</small></h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>            
+            <div class="card-body">  
+                <div class="card-content">
+                    <div id="product-summary" class="media-list position-relative">
+                        <div class="table-responsive">
+                            <table class="table table-padded table-xl mb-0 w-100" id="process-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Process ID</th>
+                                        <th>Process Name</th>
+                                        <th>Entry By</th>                                                        
+                                        <th>Entry Date</th>
+                                        <th>Updated By</th>
+                                        <th>Updated Date</th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>              
+            </div>
+        </div>
+    
+    </div>
+</div>
+
+<partial name="_ProcessEntry" />
+
+@section Scripts
+{
+    <script>
+    var table;
+
+    table = $('#process-list-table').DataTable({
+        "filter": true, // this is for disable filter (search box)
+        "paging": true,
+        "pageLength": 10,
+        "lengthChange": false,
+        "pagingType": "full_numbers",
+        "scrollX": false,
+        "autoWidth": true,
+        "initComplete": function (settings, json) {
+            $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+
+            var btns = $('.btn-primary');
+                btns.addClass('btn-sm');
+                btns.removeClass('btn-secondary');
+        },
+        buttons: [
+            {
+                id:"btnAddNew",
+                text: 'Add New',
+                className: 'btn-primary',
+                action: function ( e, dt, node, config ) {
+                    $("#process-entry-modal").modal('show');
+                }
+            }
+        ],
+    });
+
+    loadProcessList();
+
+
+    function loadProcessList() {
+
+        $('#process-list-table').DataTable().destroy();
+
+        table =  $('#process-list-table').DataTable({
+            //"processing": true, // for show progress bar
+            "language": {
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+            },
+            "filter": true, // this is for disable filter (search box)
+            "paging": true,
+            "pageLength": 10,
+            "lengthChange": false,
+            "pagingType": "full_numbers",
+            "scrollX": false,
+            "autoWidth": true,
+            "bInfo" : false,
+            "ajax": {
+                "url": "/Process/GetAllProcessList",
+                "dataSrc": function(d) {
+                    if (d.data.length === 0) {
+                        var settings = $('#process-list-table').DataTable().settings()[0];
+                        settings.oLanguage.sEmptyTable = d.message;
+                    }
+                    return d.data;
+                },
+                "type": "GET",
+                "dataType": "json"
+            },
+            "columns": [
+                { "data": "id", "name": "Id" },
+                { "data": "processName", "name": "ProcessName" },
+                { "data": "entryBy", "name": "EntryBy" },
+                { "data": "entryDate", "name": "EntryDate"},
+                { "data": "updatedBy", "name": "UpdatedBy" },
+                { "data": "updatedDate", "name": "UpdatedDate"},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var dom = '<span class="cursor-pointer row-edit" ><i class="fas fa-edit primary fa-2x"></i><span>';
+                        return dom;
+                    },
+                    ordering: false
+                },
+            ],
+             columnDefs: [{
+                 render: function(data) {
+                        var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                         var date = new Date(data);
+                         var month = months[date.getMonth()];
+                         return date.getDate()+"-"+month + "-" + date.getFullYear()
+                           + ' ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                     },
+                    targets: [3,5]
+                }
+             ],
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    id:"btnAddNew",
+                    text: 'Add New',
+                    className: 'btn-primary',
+                    action: function ( e, dt, node, config ) {                    
+                        clearModal();
+                        $("#process-entry-modal").modal('show');
+                    }
+                }
+            ],
+            "initComplete": function(settings, json) {
+                $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+
+                var btns = $('.btn-primary');
+                btns.addClass('btn-sm');
+                btns.removeClass('btn-secondary');
+            }
+        });
+
+
+
+    }
+
+    function clearModal() {
+        $('#processName').val('');
+        $('#hdnProcessId').val('');
+        $('#option').text('Entry');
+    }
+
+    $('#process-entry-modal').on('click', '#btn-process-save', function () {
+
+         var processName = $('#processName').val();
+
+         var processId = $('#hdnProcessId').val();
+
+         if (!(processName) || processName == null) {
+             toastr.error('Sorry!!! Process name is required!!!');
+             $.alert('Sorry!!! Process name is required!!!');
+             return;
+         }
+
+
+         $.confirm({
+            title: 'Confirm!',
+            content: 'Are you sure to save?',
+            buttons: {
+                confirm: function () {
+                    var process = {};
+                    process['ProcessName'] = processName;
+                    process['Id'] = processId;
+
+
+                    $.ajax({
+                        url: "/Process/SaveProcess",
+                        type: "POST",
+                        data: { process: process },
+                        success: function (data) {
+
+                            if (data.status == true) {
+                                toastr.success("message", data.message);
+                               $("#process-entry-modal").modal('hide');
+                                clearModal();
+                                loadProcessList();
+                            }
+                            else {
+                                toastr.error("Error", data.message);
+                                $.alert(data.message);
+                            }
+                        }
+                    });
+
+                },
+                cancel: function () {
+                    
+                }
+            }
+        });
+            
+        });
+
+$('#process-list-table').on('click', '.row-edit', function() {
+
+    var rowData = table.row($(this).parents('tr')).data();
+
+    $('#processName').val(rowData['processName']);
+    $('#hdnProcessId').val(rowData['id']);
+    $('#option').text('Edit');
+
+    $("#process-entry-modal").modal('show');
+} )
+       
+function CloseModalPopup() {       
+            $("#process-entry-modal").modal('hide');
+            $("#btn_close").modal('hide');   
+    }
+
+    </script>
+}

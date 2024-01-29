@@ -1,0 +1,482 @@
+﻿@{
+    ViewData["Title"] = "Call Plan Approve";
+    Layout = "~/Views/Shared/Template/_Layout.cshtml";
+}
+<br />
+<div class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                <ul class="nav nav-tabs" id="custom-content-above-tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="custom-content-waiting-List-tab" data-bs-toggle="tab" href="#custom-content-waiting-List" role="tab" aria-controls="custom-content-waiting-List" aria-selected="true">Approval Waiting List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-content-approved-list-tab" data-bs-toggle="tab" href="#custom-content-approved-list" role="tab" aria-controls="custom-content-approved-list" aria-selected="false">Approved List</a>
+                    </li>
+                </ul>
+
+                <div class="">
+                    <input type="hidden" id="tempId" />
+                </div>
+            </div>
+
+            <div class="tab-content" id="custom-content-above-tabContent">
+                <div class="tab-pane fade show active" id="custom-content-waiting-List" role="tabpanel" aria-labelledby="custom-content-waiting-List-tab">
+                   <partial name="_ApprovalWaitingList" />
+                </div>
+
+                <div class="tab-pane fade" id="custom-content-approved-list" role="tabpanel" aria-labelledby="custom-content-approved-list-tab">
+                    <partial name="_ApprovedList" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_CallPlanApprove" />
+<partial name="_ApprovedViewDetails" />
+
+@section Scripts
+    {
+<script>
+         $(function () {
+            $('#UTentativeDate').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                format: "dd-M-yyyy",
+                language: "tr",
+                autoclose: true,
+                startDate: "+0d"
+            });
+        });
+
+         $(document).on('click', '#custom-content-waiting-List-tab', function() {
+                loadCallPlanList();
+         })
+
+         $(document).on('click', '#custom-content-approved-list-tab', function() {
+                loadCallPlanList1();
+         })
+
+        function loadCallPlanList1() {
+
+            $('#callplan-list-table1').DataTable().destroy();
+
+            table1 =  $('#callplan-list-table1').DataTable({
+                //"processing": true, // for show progress bar
+                "language": {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+                },
+                "filter": true, // this is for disable filter (search box)
+                "paging": true,
+                "pageLength": 10,
+                "lengthChange": false,
+                "pagingType": "full_numbers",
+                "scrollX": false,
+                "autoWidth": true,
+                "ajax": {
+                    "url": "/CallPlanApprove/GetList",
+                    "dataSrc": function(d) {
+                        if (d.data.length === 0) {
+                            var settings = $('#callplan-list-table1').DataTable().settings()[0];
+                            settings.oLanguage.sEmptyTable = d.message;
+                        }
+                        return d.data;
+                    },
+                    "data": {status: 'APPROVED'},
+                    "type": "GET",
+                    "dataType": "json"
+                },
+                "columns": [
+                    { "data": "tentativeDate", "name": "TentativeDate" },  
+                    { "data": "empPin", "name": "Emp PIN" },  
+                    { "data": "callPlanId", "name": "CallPlanId" },
+                    { "data": "categoryName", "categoryName": "CategoryName" },
+                    { "data": "callTypeName", "categoryName": "CallTypeName" },
+                    //{ "data": "cif", "categoryName": "CIF" },
+                    { "data": "name", "categoryName": "Name" },
+                    { "data": "subject", "categoryName": "Subject" },
+                    { "data": "status", "categoryName": "Status" },
+                    //{
+                    //    data: null,
+                    //    render: function (data, type, row) {
+                    //        var dom = '<span class="btn btn-info row-edit1" style="margin:0px;padding: 0px;width: 25px;margin-bottom:-7px;margin-top:-7px"><i class="fas fa-eye primary fa-0.5x"></i><span>';
+                    //        return dom;
+                    //    },
+                    //    ordering: false
+                    //},
+                ],
+                dom: 'Bfrtip',
+                columnDefs: [{
+                     render: function(data) {
+                            var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                             var date = new Date(data);
+                             var month = months[date.getMonth()];
+                             return date.getDate()+"-"+month + "-" + date.getFullYear();
+                         },
+                        targets: [0]
+                    }
+                 ],
+                "initComplete": function(settings, json) {
+                    $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+
+                    var btns = $('.btn-primary');
+                    btns.addClass('btn-sm');
+                    btns.removeClass('btn-secondary');
+                }
+            });
+        }
+
+        $('#callplan-list-table1').on('click', '.row-edit1', function() {
+            var rowData = table1.row($(this).parents('tr')).data();
+            console.log(rowData);
+            $('#lblBatchno1').text(rowData['batchNo']);
+            let batchno=$("#lblBatchno1").text(); 
+            
+            loadupdateCallPlanList1(batchno);
+            $("#callPlan-update-modal1").modal('show');
+        } )
+
+        var table;
+        table = $('#callplan-list-table').DataTable({
+            "filter": true, // this is for disable filter (search box)
+            "paging": true,
+            "pageLength": 10,
+            "lengthChange": false,
+            "pagingType": "full_numbers",
+            "scrollX": false,
+            "autoWidth": true,
+            "initComplete": function (settings, json) {
+                $("#callplan-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+
+                var btns = $('.btn-primary');
+                    btns.addClass('btn-sm');
+                    btns.removeClass('btn-secondary');
+            },
+            buttons: [
+                {
+                    id:"btnAddNew",
+                    text: 'Add New',
+                    className: 'btn-primary',
+                    action: function ( e, dt, node, config ) {
+                        $("#callPlan-entry-modal").modal('show');
+                    }
+                }
+            ],
+        });
+
+        loadCallPlanList();
+
+        function loadCallPlanList() {
+
+            $('#callplan-list-table').DataTable().destroy();
+
+            table =  $('#callplan-list-table').DataTable({
+                "language": {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+                },
+                "filter": true, // this is for disable filter (search box)
+                "paging": true,
+                "pageLength": 10,
+                "lengthChange": false,
+                "pagingType": "full_numbers",
+                "scrollX": false,
+                "autoWidth": true,
+                "ajax": {
+                    "url": "/CallPlanApprove/GetList",
+                    "dataSrc": function(d) {
+                        if (d.data.length === 0) {
+                            var settings = $('#callplan-list-table').DataTable().settings()[0];
+                            settings.oLanguage.sEmptyTable = d.message;
+                        }
+                        return d.data;
+                    },
+                    "data": {status: 'INITIATED'},
+                    "type": "GET",
+                    "dataType": "json"
+                },
+                "columns": [
+                    { "data": "tentativeDate", "name": "TentativeDate" },  
+                    { "data": "empPin", "name": "Emp PIN" },  
+                    { "data": "callPlanId", "name": "CallPlanId" },
+                    { "data": "categoryName", "categoryName": "CategoryName" },
+                    { "data": "callTypeName", "categoryName": "CallTypeName" },
+                    //{ "data": "cif", "categoryName": "CIF" },
+                    { "data": "name", "categoryName": "Name" },
+                    { "data": "subject", "categoryName": "Subject" },
+                    { "data": "status", "categoryName": "Status" },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            var dom = '<span class="cursor-pointer row-edit" ><i class="fas fa-eye fa-1x"></i></span>'
+                                + '&nbsp;&nbsp;|&nbsp;&nbsp;<span class="cursor-pointer row-delete" ><i class="fas fa-trash fa-1x"></i></span>'
+                            return dom;
+                        },
+                        ordering: false
+                    },
+                ],
+                dom: 'Bfrtip',
+                columnDefs: [{
+                     render: function(data) {
+                            var  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                             var date = new Date(data);
+                             var month = months[date.getMonth()];
+                             return date.getDate()+"-"+month + "-" + date.getFullYear();
+                         },
+                        targets: [0]
+                    }
+                 ],
+                "initComplete": function(settings, json) {
+                    $("#process-list-table").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+
+                    var btns = $('.btn-primary');
+                    btns.addClass('btn-sm');
+                    btns.removeClass('btn-secondary');
+                }
+            });
+        }
+
+         $('#callplan-list-table').on('click', '.row-edit', function() {
+
+            var rowData = table.row($(this).parents('tr')).data();
+             $('#UPurpose').attr('readonly', false);
+             $('#USubject').attr('readonly', false);
+             $('#UName').attr('readonly', false);
+             //$('#UCIF').attr('readonly', false);
+             $('#UCategoryId').attr('disabled', false);
+             $('#UCallTypeId').attr('disabled', false);
+
+
+            console.log(rowData);
+            //alert(rowData['name']);
+            $('#UName').val(rowData['name']);
+
+            $('#UCategoryId').html('');
+             var optionState ='';
+             optionState ='<option value="' + rowData['categoryId'] +'">' + rowData['categoryName'] +'</option>';
+             $('#UCategoryId').append(optionState);
+
+
+             $('#UCallTypeId').html('');
+             var optionState ='';
+             optionState ='<option value="' + rowData['callTypeId'] +'">' + rowData['callTypeName'] +'</option>';
+             $('#UCallTypeId').append(optionState);
+
+             var leadType=$('#UCallTypeId').text();
+             if(leadType=='New')
+             {
+               $('#UCIF').attr('disabled',true);
+             }else{$('#UCIF').attr('disabled',false);}
+
+            $('#UCIF').val(rowData['cif']);
+
+            $('#USubject').val(rowData['subject']);
+            $('#UPurpose').val(rowData['purpose']);
+            $('#UTentativeDate').val(rowData['strTentativeDate']);
+            $('#UtempId').val(rowData['id']);
+
+
+            $("#callPlan-update-modal").modal('show');
+        } )
+ LoadLeadType();
+         var pageSize = 5;
+         $("#UCategoryId").select2({
+            multiple: false,
+            delay: 250,
+            cache: true,
+            placeholder: "Select a Category",
+            templateSelection: function (state) {
+                if (state.id) {
+                    return state.name ? state.name : state.text;
+                }
+            },
+            ajax: {
+                url: "/Category/CategoryFilterByProcess",
+                data: function (params) {
+                    var query = {
+                        categoryName: (!params.term) ?  "":params.term,
+                        pageNumber: params.page || 1,
+                        pageSize: pageSize
+                    };
+                    return query;
+                },
+                dataType: 'json',
+                processResults: function (response, params) {
+
+                    selectData = {};
+                    params.page = params.page || 1;
+                    selectData = response.data.map(function (item) {
+                        return {
+                            id: item.id,
+                            text: item.categoryName
+                        };
+                    });
+                    //hideLoader();
+                    return {
+                        results: selectData,
+                        pagination: {
+                            more: (params.page * pageSize) < response.total
+                        }
+                    };
+                }
+            },
+
+            allowClear: true
+
+        })
+
+         $("#UCallTypeId").select2({
+            multiple: false,
+            delay: 250,
+            cache: true,
+            placeholder: "Select a Call Type",
+            templateSelection: function (state) {
+                if (state.id) {
+                    return state.name ? state.name : state.text;
+                }
+            },
+            ajax: {
+                url: "/CallType/CallTypeFilter",
+                data: function (params) {
+                    var query = {
+                        term: (!params.term) ?  "":params.term ,
+                        pageNumber: params.page || 1,
+                        pageSize: pageSize
+                    };
+                    return query;
+                },
+                dataType: 'json',
+                processResults: function (response, params) {
+
+                    selectData = {};
+                    params.page = params.page || 1;
+                    selectData = response.data.map(function (item) {
+                        return {
+                            id: item.id,
+                            text: item.name
+                        };
+                    });
+                    //hideLoader();
+                    return {
+                        results: selectData,
+                        pagination: {
+                            more: (params.page * pageSize) < response.total
+                        }
+                    };
+                }
+            },
+
+            allowClear: true
+
+        });
+        
+         $(document).on('select2:open', () => {
+            document.querySelector('.select2-search__field').focus();
+      });
+
+         function clearModal() {
+            $('#UCategoryId').val(null).trigger("change");
+            $('#UCallTypeId').val(null).trigger("change");
+            $('#UCIF').val('');
+            $('#UName').val('');
+            $('#USubject').val('');
+            $('#UPurpose').val('');
+            $('#UTentativeDate').val('');
+            $('#UtempId').val('');
+           // $('#btn-Temp-Add').text('Add Plan');
+        }
+
+         $('#callPlan-update-modal').on('click', '#btn-callPlan-approve', function () {
+
+             let id=$("#UtempId").val();
+
+             $.confirm({
+                title: 'Confirm!',
+                content: 'Are you sure to approve?',
+                buttons: {
+                    confirm: function () {
+
+                        $.ajax({
+                            url: "/CallPlanApprove/ApprovePlan",
+                            type: "POST",
+                            data:{id:id},
+                            success: function (data) {
+
+                                if (data.status == true) {
+                                    toastr.success("message", data.message);
+                                    $("#callPlan-update-modal").modal('hide');
+                                    clearModal();
+                                    loadCallPlanList();
+                                   
+                                }
+                                else {
+                                    toastr.error("Error", data.message);
+                                    $.alert(data.message);
+                                }
+                            }
+                        });
+
+                    },
+                    cancel: function () {
+
+                    }
+                }
+            });
+
+            });
+
+
+        
+    $('#callplan-list-table').on('click', '.row-delete', function() {
+
+        var rowData = table.row($(this).parents('tr')).data();
+        console.log(rowData);
+        var flag=1;
+        
+
+        $.confirm({
+            title: 'Confirm!',
+            content: 'Are you sure to delete?',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        url: "/CallPlanApprove/PlanNotExcepted",
+                        type: "POST",
+                        data: { id: rowData['id'] },
+                        success: function (data) {
+                            if (data.status == true) {                               
+                                clearModal();
+                                loadCallPlanList();
+                            }
+                            else {
+                                toastr.error("Error", data.message);
+                                $.alert(data.message);
+                            }
+                        }
+                    });
+
+                },
+                cancel: function () {
+                    
+                }
+            }
+        });       
+    } )
+
+  function CloseModalPopup() {       
+            $("#callPlan-update-modal").modal('hide');
+    }
+
+   function LoadLeadType(){
+           $('select#UCallTypeId').change(function(){
+             var LeadType = $(this).children("option:selected").text();
+             if(LeadType=='New')
+              {
+                $('#UCIF').attr('disabled',true);
+              }else{$('#UCIF').attr('disabled',false);}
+          });
+     }
+
+</script>
+    }

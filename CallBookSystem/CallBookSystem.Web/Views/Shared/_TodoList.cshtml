@@ -1,0 +1,73 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@using CallBookSystem.Domain.Entities
+@model IList<CallPlan>
+
+ <div class="card-header">
+           @* <h3 class="card-title">
+                <i class="ion ion-clipboard mr-1"></i>
+                To Do List
+            </h3>*@
+             <div class="font-medium-2 font-weight-bold  text-center app-name1" style="margin-left: -3px;">
+               To Do List
+            </div>
+            <div class="card-tools">
+
+                @if(Model.Count >0)
+                {                    
+                <ul class="pagination pagination-sm">
+                    <li class="page-item"><a href="#" class="page-link">&laquo;</a></li>
+                    
+                    @for (int i = 1; i <= Convert.ToInt32( Math.Ceiling(Model[0].TotalRow/5M)); i++)
+                    {
+                        <li class="page-item"><a href="javascript:;" class="page-link" data-page-number="@i" >@i</a></li>
+                    }
+                    <li class="page-item"><a href="#" class="page-link">&raquo;</a></li>
+                </ul>
+                }
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            
+            <ul class="todo-list" data-widget="todo-list" id="todo-list-ul">
+
+        @foreach(var item in Model)
+        {
+            <li data-name = "@item.Name" data-category-id = "@item.CategoryId" data-category-name = "@item.CategoryName"
+                data-call-type-id="@item.CallTypeId" data-call-type-name="@item.CallTypeName"  data-cif = "@item.cif"
+                data-subject = "@item.Subject" data-purpose = "@item.Purpose" data-tentative-date = "@item.strTentativeDate"
+                data-id= "@item.Id" class="row-edit" style="cursor: pointer;" >
+                <!-- drag handle -->
+                <span class="handle">
+                    <i class="fas fa-ellipsis-v"></i>
+                    <i class="fas fa-ellipsis-v"></i>
+                </span>
+                <!-- checkbox -->
+                @*<div class="icheck-primary d-inline ml-2">
+                    <input type="checkbox" value="" name="todo1" id="todoCheck1">
+                    <label for="todoCheck1"></label>
+                </div>*@
+                <!-- todo text -->
+                <span class="text"> Plan Approval Pending: 
+                   @item.ShortName | @item.ShortSubject | @item.strTentativeDate | @item.EmpName (@item.EmpPin)
+                </span>
+                <!-- Emphasis label -->
+                <small class="float-right badge badge-danger"><i class="far fa-clock"></i>  @Convert.ToInt32( DateTime.Now.Subtract(item.EntryDate).TotalHours) Hours</small>
+                <!-- General tools such as edit or delete-->
+                <div class="tools">
+                    <i class="fas fa-edit"></i>
+                    <i class="fas fa-trash-o"></i>
+                </div>
+            </li>
+        }
+        
+               
+            </ul>
+        </div>
+        <!-- /.card-body -->
+        <div class="card-footer clearfix">            
+        </div>
